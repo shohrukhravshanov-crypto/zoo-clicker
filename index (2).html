@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+  <title>ЗООКЛИКЕР</title>
+  <style>
+@import url('https://fonts.googleapis.com/css2?family=Russo+One&family=PT+Sans:wght@400;700&display=swap');
+:root{--green:#14532d;--red:#b91c1c;--gold:#d97706;--paper:#fffbeb}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:'PT Sans',sans-serif;color:#292524}
+body{background:var(--paper);background-image:radial-gradient(circle,rgba(28,25,23,.05) 1px,transparent 1px);background-size:15px 15px}
+button,input,textarea{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.4}
+.page{min-height:100vh;width:100%;padding:16px;position:relative}.center{display:flex;align-items:center;justify-content:center;flex-direction:column}
+.auth-wrap{width:100%;max-width:380px}.title{text-align:center;margin-bottom:24px}.tent{font-size:60px;margin-bottom:8px}.title h1,h2{font-family:'Russo One',sans-serif;color:var(--green);letter-spacing:1px;margin:0}.title h1{font-size:40px}.title p,.sub{color:#78716c;font-size:14px;margin:5px 0 0}
+.card{background:#fff;border:2px solid #1c1917;border-radius:12px}.last-login-card{width:100%;max-width:380px;padding:18px;margin-bottom:12px;text-align:center}.last-login-label{font-size:11px;letter-spacing:1px;color:#78716c;font-weight:700}.last-login-name{font-family:'Russo One',sans-serif;color:#14532d;font-size:18px;margin:8px 0 12px}.last-login-card .primary{width:100%}.forget-login{border:0;background:none;color:#78716c;text-decoration:underline;font-size:12px;margin-top:10px}.auth-card{padding:24px;display:flex;flex-direction:column;gap:12px}.row{display:flex;gap:8px}.row>*{min-width:0}.auth-card input,.auth-card textarea,.narrow>input,.owner-box input,.comment input,.compact input{width:100%;border:2px solid #d6d3d1;border-radius:6px;padding:12px;color:#292524;background:#fff;outline:0}.auth-card input:focus,.auth-card textarea:focus,input:focus{border-color:#166534}
+.stamp{border:2px solid #1c1917;border-radius:6px;box-shadow:4px 4px 0 var(--shadow,#14532d);transition:.08s;}.stamp:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--shadow,#14532d)}
+.primary{background:#d97706;color:white;padding:13px;font-family:'Russo One',sans-serif}.hint{font-size:12px;color:#78716c;text-align:center;margin:0}.error{color:#b91c1c;font-size:14px;text-align:center;min-height:18px}.notice{padding:8px;border-radius:6px;text-align:center}.notice.red{background:#fef2f2;color:#b91c1c}
+.animals{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%;max-width:380px;margin-top:22px}.animal-choice{aspect-ratio:1;border:4px solid var(--green);border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;transition:.12s}.animal-choice:active{transform:scale(.95)}.animal-choice span{font-size:42px}.animal-choice b{font-size:12px;color:#57534e}
+.back,.help-link,.change{border:0;background:none;text-decoration:underline;color:#78716c;padding:0}.back{margin-bottom:16px}.center-text{text-align:center}.help-card{max-width:380px;margin:0 auto;padding:20px;font-size:14px;color:#44403c}.help-card p{margin:0 0 12px}
+.narrow{width:100%;max-width:380px;margin:0 auto}.narrow>input{margin:12px 0}.list{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}.player-select{display:flex;align-items:center;gap:8px;width:100%;border:2px solid #d6d3d1;background:#fff;border-radius:6px;padding:10px;text-align:left}.player-select.selected{border-color:var(--green);background:#f0fdf4}.player-select i{width:8px;height:8px;border-radius:50%;margin-left:auto}.online{background:#22c55e}.offline{background:#78716c}.success{color:#166534;text-align:center;min-height:20px;font-size:14px}.empty{color:#78716c;text-align:center;font-size:14px;padding:12px}
+.event-active,.event-pill{background:#fff;border:2px solid #d97706;border-radius:12px;text-align:center}.event-active{max-width:380px;margin:0 auto 16px;padding:14px;display:flex;flex-direction:column;gap:4px}.event-active small{color:#78716c}.event-list{display:flex;flex-direction:column;gap:10px}.event-btn{display:flex;justify-content:space-between;align-items:center;padding:12px;background:#fff}.event-btn span{font-size:12px;color:#78716c}
+.game-page{display:flex;flex-direction:column;align-items:center;overflow:hidden}.topbar{width:100%;max-width:380px;display:flex;justify-content:space-between;align-items:center;margin-top:2px}.user-name{font-weight:700;font-size:14px}.top-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.icon-btn{background:#fff;border:2px solid #1c1917;border-radius:6px;padding:7px;font-size:15px}.icon-btn.dark{background:#1c1917;color:#f59e0b}.help-link{font-size:12px;margin:7px 0 12px;display:flex;gap:4px}
+.coin-pill{background:#d97706;border:4px solid #1c1917;border-radius:999px;color:#fff;padding:7px 24px;margin-bottom:12px;font-family:'Russo One',sans-serif;font-size:25px}.broadcast,.toast{position:fixed;z-index:20;top:16px;left:50%;transform:translateX(-50%);background:#1c1917;color:#fff;border-radius:9px;padding:11px 16px;max-width:320px;text-align:center;font-weight:700;box-shadow:0 8px 20px #0003}.toast{top:70px}.toast.reply{background:#166534}.event-pill{padding:7px 16px;margin-bottom:14px;font-size:14px;font-weight:700}.animal-zone{width:224px;height:224px;position:relative;display:flex;align-items:center;justify-content:center}.animal-main{width:224px;height:224px;border-radius:50%;background:#fff;border:8px solid var(--green);box-shadow:0 8px 0 var(--green);display:flex;align-items:center;justify-content:center;transition:transform .1s}.animal-main.punch{transform:scale(.9)}.animal-main span{width:176px;height:176px;border:4px solid var(--gold);border-radius:50%;background:#fffbeb;display:flex;align-items:center;justify-content:center;font-size:92px}.floater{position:absolute;top:15%;left:50%;transform:translateX(-50%);font-family:'Russo One',sans-serif;font-size:25px;color:var(--gold);animation:float .7s ease-out forwards;pointer-events:none}@keyframes float{to{transform:translate(-50%,-60px);opacity:0}}
+.change{font-size:12px;margin-top:12px}.total-mult{margin-top:16px;background:#b91c1c;color:#fff;border-radius:999px;padding:6px 16px;font-weight:700}.shop{width:100%;max-width:380px;margin-top:18px}.shop>label{display:flex;justify-content:space-between;font-size:12px;color:#78716c;font-weight:700;letter-spacing:1px;margin-bottom:8px}.shop em{font-style:normal;color:#dc2626}.shop-btn{width:100%;padding:10px 14px;background:#fff;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.shop-btn.affordable{background:#fff;opacity:1;cursor:pointer}.shop-btn.unaffordable{background:#d6d3d1!important;color:#78716c;opacity:1;cursor:not-allowed;box-shadow:4px 4px 0 #a8a29e}.shop-btn.unaffordable b,.shop-btn.unaffordable span{color:#78716c}.shop-btn b{font-family:'Russo One',sans-serif;font-size:13px}.shop-btn span,.shop small{font-size:12px;color:#78716c}.perm{background:#fffbeb}.maxbox{background:#fff;border:2px solid #1c1917;border-radius:6px;text-align:center;padding:12px;font-size:12px}.shop small{display:block;text-align:center;margin-top:4px}
+.blocked{background:#fff;border:2px solid #1c1917;border-radius:12px;padding:32px;text-align:center;max-width:300px;margin:30px auto}.blocked>div{font-size:42px}.blocked b{font-family:'Russo One',sans-serif;color:var(--green)}.blocked p{color:#78716c;font-size:14px}
+.owner-page{min-height:100vh;background:#1c1917;padding:16px;color:#fff}.owner-wrap{max-width:430px;margin:auto}.owner-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;font-family:'Russo One',sans-serif;color:#f59e0b}.darkback{color:#a8a29e}.owner-box{background:#292524;border:1px solid #44403c;border-radius:8px;padding:14px;margin-bottom:14px}.owner-box>.row{margin-top:8px}.owner-box input,.comment input{background:#44403c;border:0;color:#fff;padding:9px}.owner-box button{border:0;border-radius:6px;color:#fff;padding:9px 12px;font-weight:700}.remove-announcement{background:#57534e!important;width:100%;margin-top:8px}.owner-box .red,.owner-box .green{padding:9px 12px}.red{background:#b91c1c}.green{background:#15803d}.orange{background:#c2410c}.darkred{background:#991b1b}.gold-btn{background:#d97706!important}.wide{flex:1}.owner-toggle{background:none!important;padding:0!important}.stack{margin-top:12px;display:flex;flex-direction:column;gap:8px}.mini-list{max-height:160px;overflow:auto;display:flex;flex-direction:column;gap:4px}.mini-list button{background:#44403c;text-align:left}.players-head{display:flex;justify-content:space-between;align-items:center;margin:10px 0}.players-head button{background:none;border:0;color:#a8a29e;font-size:20px}.owner-list{display:flex;flex-direction:column;gap:8px}.owner-card{background:#292524;border:1px solid #44403c;border-radius:8px;padding:12px}.player-head{display:flex;justify-content:space-between;align-items:center;font-size:14px}.player-head strong{color:#f59e0b}.badges{display:flex;flex-wrap:wrap;gap:7px;font-size:12px;margin:8px 0}.purple{color:#c084fc}.gold{color:#fbbf24}.pink{color:#f87171}.orange{color:#fb923c}.compact{margin-top:7px}.compact input{width:58px;background:#44403c;color:#fff;border:0;padding:6px}.compact button{border:0;border-radius:5px;padding:6px 9px;color:#fff}.compact .kick{margin-left:auto;background:none;color:#a8a29e}.push{margin-left:auto}.comment{background:#1c1917;border-radius:6px;padding:8px;margin-top:8px;font-size:12px;color:#d6d3d1}.comment small{color:#4ade80;display:block;margin-top:5px}
+.darkempty{color:#78716c}.disco{animation:hue 3s linear infinite}@keyframes hue{to{filter:hue-rotate(360deg)}}
+@media(max-width:420px){.page{padding:12px}.title h1{font-size:34px}.animal-main,.animal-zone{width:210px;height:210px}.animal-main span{width:164px;height:164px;font-size:82px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.player-admin-row{background:#fafaf9;border:1px solid #d6d3d1;border-radius:8px;padding:8px;margin-bottom:7px}.admin-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}.admin-actions button{border:1px solid #a8a29e;background:#fff;border-radius:6px;padding:6px 8px;font-size:11px;font-weight:700}.admin-actions .danger{background:#fee2e2;border-color:#ef4444;color:#991b1b}.gray{background:#57534e!important;color:#fff!important;border:0;border-radius:6px;padding:9px 12px;font-weight:700}.gift-preview{min-height:20px;margin:5px 0 10px;padding:8px;border-radius:6px;background:#f5f5f4;color:#57534e;font-size:12px;text-align:center}</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* Вся логика находится внутри HTML: отдельного JS-файла нет. */
+const ANIMALS=[
+  {id:"cat",emoji:"🐱",name:"Кот"},{id:"dog",emoji:"🐶",name:"Пёс"},
+  {id:"fox",emoji:"🦊",name:"Лиса"},{id:"panda",emoji:"🐼",name:"Панда"},
+  {id:"lion",emoji:"🦁",name:"Лев"},{id:"rabbit",emoji:"🐰",name:"Кролик"},
+  {id:"bear",emoji:"🐻",name:"Медведь"},{id:"tiger",emoji:"🐯",name:"Тигр"},
+  {id:"koala",emoji:"🐨",name:"Коала"},{id:"penguin",emoji:"🐧",name:"Пингвин"}
+];
+const OWNER_CODE="BOSS2026", SCALE_THRESHOLD=1000, ONLINE_MS=30000;
+const TEMP_BOOSTS=[
+  {mult:2,baseCost:200,scaledCost:2000,minutes:10},
+  {mult:4,baseCost:500,scaledCost:5000,minutes:10},
+  {mult:10,baseCost:2000,scaledCost:15000,minutes:20}
+];
+const EVENTS={
+  evening:{cost:100000,mult:1.5,minutes:10,emoji:"🌆",label:"Вечернее событие"},
+  disco:{cost:500000,mult:2.5,minutes:15,emoji:"🪩",label:"Диско"},
+  gold:{cost:0,mult:10,minutes:20,emoji:"✨",label:"Gold Event",ownerOnly:true}
+};
+const state={
+  screen:"auth",user:null,blocked:false,broadcast:"",event:null,
+  toast:null,reply:null,players:[],abuseOpen:false,abuseTarget:false,
+  giftPlayers:[],giftRecipient:null,floaters:[],punch:false
+};
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+const full=p=>`${p.firstName} ${p.lastName}`;
+const key=n=>"zoo-player:"+n;
+const LAST_ACCOUNT_KEY="zoo-last-account";
+function getLastAccount(){
+  try{return JSON.parse(localStorage.getItem(LAST_ACCOUNT_KEY)||"null")}catch{return null}
+}
+function rememberLastAccount(p){
+  localStorage.setItem(LAST_ACCOUNT_KEY,JSON.stringify({
+    firstName:p.firstName,lastName:p.lastName
+  }));
+}
+function forgetLastAccount(){localStorage.removeItem(LAST_ACCOUNT_KEY)}
+function loginLast(){
+  const a=getLastAccount();
+  if(!a)return;
+  const p=get(`${a.firstName} ${a.lastName}`);
+  if(!p){forgetLastAccount();render();return}
+  state.user={...p,kicked:false,lastSeen:Date.now()};
+  save(state.user);
+  loadGlobal();
+  rememberLastAccount(state.user);state.screen=state.user.animal?"game":"animal";
+  render();
+}
+
+const fmt=n=>Math.floor(Number(n)||0).toLocaleString("ru-RU");
+const fmtMult=n=>Number.isInteger(n)?String(n):Number(n).toFixed(1);
+const perm=t=>t>0?2**t:1;
+const nextPerm=t=>2**(t+1);
+const permCost=t=>150*2**t;
+const rebirthMult=r=>r>0?1.5*2**(r-1):1;
+const rebirthCost=n=>50*8**(n-1);
+const animal=id=>ANIMALS.find(a=>a.id===id)||ANIMALS[0];
+const online=p=>p.lastSeen && Date.now()-p.lastSeen<ONLINE_MS;
+const personalBlocked=p=>!!p&&(p.blockedForever||(p.blockedUntil&&p.blockedUntil>Date.now()));
+const tempCost=(i,total)=>(Number(total)||0)>=SCALE_THRESHOLD?TEMP_BOOSTS[i].scaledCost:TEMP_BOOSTS[i].baseCost;
+const mult=p=>{
+  if(!p)return 1;
+  const reb=rebirthMult(p.rebirths||0), pe=perm(p.permanentTier||0);
+  if(p.ownerX0Until&&p.ownerX0Until<=Date.now()){p.ownerX0Until=0;save(p)}
+  if(p.ownerX0Until>Date.now())return 0;
+  const tb=p.boostExpiresAt>Date.now()?p.boostMultiplier:1;
+  const ev=state.event&&state.event.expiresAt>Date.now()?state.event.mult:1;
+  return reb*pe*tb*ev;
+};
+function save(p){
+  try{localStorage.setItem(key(full(p)),JSON.stringify(p));}
+  catch(e){console.warn("Не удалось сохранить данные",e);}
+}
+function get(n){
+  try{return JSON.parse(localStorage.getItem(key(n)))||null}catch{return null}
+}
+function names(){return JSON.parse(localStorage.getItem("zoo-players")||"[]")}
+function addName(n){let a=names();if(!a.includes(n)){a.push(n);localStorage.setItem("zoo-players",JSON.stringify(a))}}
+function saveGlobal(){
+  localStorage.setItem("zoo-global",JSON.stringify({
+    blocked:state.blocked,broadcast:state.broadcast,event:state.event
+  }));
+}
+function loadGlobal(){
+  try{Object.assign(state,JSON.parse(localStorage.getItem("zoo-global")||"{}"))}catch{}
+}
+function players(){return names().map(get).filter(Boolean)}
+function notice(msg,type="normal"){
+  state.toast={msg,type}; render();
+  setTimeout(()=>{if(state.toast&&state.toast.msg===msg){state.toast=null;render()}},type==="reply"?8000:5000);
+}
+function login(){
+  const fn=$("#fn").value.trim(),ln=$("#ln").value.trim(),pw=$("#pw").value;
+  const owner=$("#owner").value.trim().toUpperCase(),comment=$("#comment").value.trim();
+  const err=$("#auth-error");
+  err.textContent="";
+  if(!fn||!ln||!pw){err.textContent="Введи имя, фамилию и пароль.";return}
+  if(/[\\s/\\'"]/.test(fn)||/[\\s/\\'"]/.test(ln)){err.textContent="Имя и фамилия без пробелов и кавычек.";return}
+  if(fn.length>20||ln.length>20){err.textContent="Имя и фамилия должны быть короче 20 символов.";return}
+  const n=`${fn} ${ln}`, old=get(n);
+  if(old){
+    if(old.password!==pw){err.textContent="Неверный пароль.";return}
+    state.user={...old,kicked:false,lastSeen:Date.now()};save(state.user);
+    state.screen=state.user.animal?"game":"animal";
+  }else{
+    state.user={firstName:fn,lastName:ln,password:pw,animal:null,coins:0,totalEarned:0,
+      isOwner:owner===OWNER_CODE,boostMultiplier:1,boostExpiresAt:0,permanentTier:0,
+      rebirths:0,blockedForever:false,blockedUntil:0,kicked:false,comment:comment.slice(0,200),
+      ownerReply:"",ownerReplyId:0,lastSeen:Date.now()};
+    save(state.user);addName(n);rememberLastAccount(state.user);state.screen="animal";
+  }
+  loadGlobal();render();
+}
+function logout(){state.user=null;state.screen="auth";render()}
+function chooseAnimal(id){state.user.animal=id;save(state.user);state.screen="game";render()}
+function clickAnimal(){
+  const u=state.user;
+  if(!u||((state.blocked&&!u.isOwner)||personalBlocked(u)))return;
+  const gain=Math.max(1,Math.round(mult(u)));
+  if(mult(u)===0){u.lastSeen=Date.now();save(u);if(coin)coin.textContent=fmt(u.coins);return}
+  u.coins+=gain;u.totalEarned+=gain;u.lastSeen=Date.now();save(u);
+  state.floaters.push("+"+gain);state.punch=true;
+  const coin=document.querySelector(".coin-pill b");
+  if(coin) coin.textContent=fmt(u.coins);
+  const btn=document.querySelector(".animal-main");
+  if(btn) btn.classList.add("punch");
+  const zone=document.querySelector(".animal-zone");
+  if(zone){
+    const f=document.createElement("div");f.className="floater";f.textContent="+"+gain;zone.appendChild(f);
+    setTimeout(()=>f.remove(),700);
+  }
+  setTimeout(()=>{state.punch=false;if(btn)btn.classList.remove("punch");},120);
+}
+function buyTemp(i){
+  const u=state.user,b=TEMP_BOOSTS[i],cost=tempCost(i,u.totalEarned);
+  if(u.boostExpiresAt>Date.now()){notice("Временный буст уже активен.");return}
+  if(Number(u.coins)<Number(cost)){notice(`Нужно ещё ${fmt(cost-u.coins)} монет.`);return}
+  u.coins-=cost;u.boostMultiplier=b.mult;u.boostExpiresAt=Date.now()+b.minutes*60000;save(u);render();
+}
+function buyPerm(){
+  const u=state.user,t=u.permanentTier||0,c=permCost(t);
+  if(Number(u.coins)<Number(c)){notice(`Нужно ещё ${fmt(c-u.coins)} монет.`);return}
+  u.coins-=c;u.permanentTier=t+1;save(u);render();
+}
+function rebirth(){
+  const u=state.user;
+  if(!u)return;
+  const n=Number(u.rebirths||0)+1;
+  const c=Number(rebirthCost(n));
+  const coins=Number(u.coins)||0;
+  if(n>100){notice("Достигнут максимум — 100 перерождений.");return}
+  if(coins<c){notice(`Для перерождения нужно ${fmt(c)} монет. У тебя ${fmt(coins)}.`);return}
+  u.coins=0;
+  u.rebirths=n;
+  save(u);
+  state.user={...u};
+  notice(`♻️ Перерождение! Монеты обнулены. Теперь множитель x${fmtMult(rebirthMult(n))}.`,"normal");
+  render();
+}
+function startEvent(type){
+  const u=state.user,c=EVENTS[type];
+  if(!c||c.ownerOnly&&!u.isOwner||state.event&&state.event.expiresAt>Date.now())return;
+  if(u.coins<c.cost)return;
+  u.coins-=c.cost;save(u);
+  state.event={type,mult:c.mult,expiresAt:Date.now()+c.minutes*60000};saveGlobal();render();
+}
+function giveGift(){
+  const amount=Math.floor(Number($("#gift-amount").value));
+  const to=state.giftRecipient,u=state.user;
+  const owner=!!u?.isOwner;
+  if(!to||!Number.isFinite(amount)||amount<=0){
+    $("#gift-status").textContent="Выбери игрока и сумму.";
+    return;
+  }
+  if(!owner && amount<1000){
+    $("#gift-status").textContent="Минимальный подарок — 1 000 монет получателю.";
+    return;
+  }
+  const total=owner?amount:Math.ceil(amount*1.10);
+  const fee=owner?0:total-amount;
+  if(!owner && total>Number(u.coins)){
+    $("#gift-status").textContent=`Нужно ${fmt(total)} монет: ${fmt(amount)} получит игрок + ${fmt(fee)} (10%) владельцу.`;
+    return;
+  }
+  const p=get(to);
+  if(!p){$("#gift-status").textContent="Игрок не найден.";return}
+  if(full(p)===full(u)){$("#gift-status").textContent="Нельзя подарить монеты самому себе.";return}
+  p.coins+=amount;
+  if(!owner)u.coins-=total;
+  save(p);
+  if(!owner){
+    const ownerPlayer=players().find(x=>x.isOwner);
+    if(ownerPlayer){ownerPlayer.coins+=fee;ownerPlayer.totalEarned=(ownerPlayer.totalEarned||0)+fee;save(ownerPlayer)}
+  }
+  $("#gift-status").textContent=owner
+    ? `Подарено ${fmt(amount)} монет игроку ${to}!`
+    : `Игрок получит ${fmt(amount)} монет. Списано ${fmt(total)}; ${fmt(fee)} (10%) получил владелец.`;
+  state.giftRecipient=null;
+  loadGiftPlayers();
+  render();
+}
+function loadGiftPlayers(){state.giftPlayers=players().filter(p=>full(p)!==full(state.user))}
+function ownerRefresh(){state.players=players().filter(p=>full(p)!==full(state.user))}
+function adjust(n,d){const p=get(n);if(!p)return;p.coins=Math.max(0,p.coins+d);save(p);ownerRefresh();render()}
+function zero(n){const p=get(n);if(!p)return;p.coins=0;save(p);ownerRefresh();render()}
+function removeBoost(n){const p=get(n);if(!p)return;p.boostMultiplier=1;p.boostExpiresAt=0;save(p);ownerRefresh();render()}
+function setX0(n){const p=get(n);if(!p)return;const min=Math.min(60,Math.max(1,Number(document.querySelector(`[data-x0="${CSS.escape(n)}"]`)?.value)||60));p.ownerX0Until=Date.now()+min*60000;save(p);ownerRefresh();render();notice(`🚫 X0 включён для ${n} на ${min} мин.`)}
+function clearX0(n){const p=get(n);if(!p)return;p.ownerX0Until=0;save(p);ownerRefresh();render();notice(`✅ X0 снят с ${n}.`)}
+
+function kick(n){const p=get(n);if(!p)return;p.kicked=true;save(p);ownerRefresh();render()}
+function blockTemp(n){
+  const min=Number(document.querySelector(`[data-block="${CSS.escape(n)}"]`)?.value)||10,p=get(n);
+  if(!p)return;p.blockedForever=false;p.blockedUntil=Date.now()+min*60000;save(p);ownerRefresh();render();
+}
+function blockForever(n){const p=get(n);if(!p)return;p.blockedForever=true;p.blockedUntil=0;save(p);ownerRefresh();render()}
+function unblock(n){const p=get(n);if(!p)return;p.blockedForever=false;p.blockedUntil=0;save(p);ownerRefresh();render()}
+function sendBroadcast(){
+  const v=$("#broadcast").value.trim();if(!v)return;state.broadcast=v;saveGlobal();$("#broadcast").value="";render();
+}
+function sendReply(n){
+  const el=document.querySelector(`[data-reply="${CSS.escape(n)}"]`),v=el?.value.trim();if(!v)return;
+  const p=get(n);if(!p)return;p.ownerReply=v.slice(0,200);p.ownerReplyId=(p.ownerReplyId||0)+1;save(p);ownerRefresh();render();
+}
+function grantAll(){
+  const m=Number($("#abuse-mult").value)||2,min=Number($("#abuse-min").value)||10,all=players();
+  for(const p of all){p.boostMultiplier=m;p.boostExpiresAt=Date.now()+min*60000;p.ownerBoost=true;save(p)}
+  notice(`⚡ Буст x${m} выдан ${all.length} игрокам на ${min} мин.`);
+  ownerRefresh();render();
+}
+function grantOne(n){
+  const m=Number($("#abuse-mult").value)||2,min=Number($("#abuse-min").value)||10,p=get(n);
+  if(!p)return;
+  p.boostMultiplier=m;p.boostExpiresAt=Date.now()+min*60000;p.ownerBoost=true;save(p);
+  notice(`⚡ Буст x${m} выдан игроку ${n} на ${min} мин.`);
+  ownerRefresh();render();
+}
+function tick(){
+  if(state.user){
+    const p=get(full(state.user));
+    if(p&&p.kicked){p.kicked=false;save(p);state.user=null;state.screen="auth";render();return}
+    if(p) state.user={...state.user,...p};
+  }
+  loadGlobal();
+  updateLiveLabels();
+}
+function updateLiveLabels(){
+  const u=state.user;
+  if(!u)return;
+  const coin=document.querySelector(".coin-pill b");
+  if(coin)coin.textContent=fmt(u.coins);
+  const multEl=document.querySelector(".total-mult");
+  if(multEl){
+    const total=mult(u),temp=u.boostExpiresAt>Date.now();
+    multEl.textContent=`⚡ x${fmtMult(total)} ${temp?"— ещё "+timeLeft(u.boostExpiresAt):""}`;
+  }
+  const ev=document.querySelector(".event-active small");
+  if(ev&&state.event)ev.textContent=`x${state.event.mult} — ещё ${timeLeft(state.event.expiresAt)}`;
+}
+function topbar(){
+  const u=state.user;
+  return `<div class="topbar">
+    <div class="user-name">${u.isOwner?"👑 ":""}${esc(full(u))}</div>
+    <div class="top-actions">
+      <button class="icon-btn" onclick="state.screen='events';render()">🎉</button>
+      <button class="icon-btn" onclick="state.screen='gift';loadGiftPlayers();render()">🎁</button>
+      ${u.isOwner?`<button class="icon-btn dark" onclick="state.screen='owner';ownerRefresh();render()">👑</button>`:""}
+      <button class="icon-btn" onclick="logout()">↪</button>
+    </div>
+  </div>
+  <button class="help-link" onclick="state.screen='help';render()">❓ как играть?</button>`;
+}
+function authView(){
+ const last=getLastAccount();
+ return `<main class="page center"><div class="auth-wrap">
+   <div class="title"><div class="tent">🎪</div><h1>ЗООКЛИКЕР</h1><p>жми на животное — получай монеты</p></div>
+   ${last?`<div class="card last-login-card">
+      <div class="last-login-label">ПОСЛЕДНИЙ ВХОД</div>
+      <div class="last-login-name">👤 ${esc(last.firstName)} ${esc(last.lastName)}</div>
+      <button class="stamp primary" onclick="loginLast()">ВОЙТИ В ПОСЛЕДНИЙ АККАУНТ</button>
+      <button class="forget-login" onclick="forgetLastAccount();render()">Войти в другой аккаунт</button>
+   </div>`:""}
+   <div class="card auth-card">
+    ${state.toast?`<div class="notice red">${esc(state.toast.msg)}</div>`:""}
+    <div class="row"><input id="fn" placeholder="Имя" maxlength="20"><input id="ln" placeholder="Фамилия" maxlength="20"></div>
+    <input id="pw" type="password" placeholder="Пароль">
+    <input id="owner" placeholder="Код владельца (не обязательно)">
+    <textarea id="comment" rows="2" maxlength="200" placeholder="Комментарий владельцу (не обязательно)"></textarea>
+    <div id="auth-error" class="error"></div>
+    <button class="stamp primary" onclick="login()">ВОЙТИ</button>
+    <p class="hint">Новые имя и фамилия создадут аккаунт. Существующие — нужен пароль.</p>
+   </div>
+ </div></main>`;
+}
+function animalView(){
+ return `<main class="page center"><h2>ВЫБЕРИ ЖИВОТНОЕ</h2><p class="sub">потом можно поменять</p>
+ <div class="animals">${ANIMALS.map(a=>`<button class="animal-choice" onclick="chooseAnimal('${a.id}')"><span>${a.emoji}</span><b>${a.name}</b></button>`).join("")}</div></main>`;
+}
+function helpView(){
+ return `<main class="page"><button class="back" onclick="state.screen='game';render()">← Назад</button><h2 class="center-text">❓ КАК ИГРАТЬ</h2>
+ <div class="card help-card"><p>🐾 Жми на животное — за каждый тап получаешь монеты.</p><p>⚡ Временные бусты ускоряют заработок на время. После 1000 накопленных монет они дорожают.</p><p>💠 Постоянный буст навсегда удваивает множитель — с каждой покупкой дороже вдвое.</p><p>♻️ Перерождение обнуляет монеты, зато навсегда усиливает множитель. До 100 перерождений.</p><p>🎉 События дают буст игрокам.</p><p>🎁 Монетами можно делиться с другими игроками.</p><p>👑 У игры есть владелец — он может как помогать, так и мешать.</p></div></main>`;
+}
+function giftView(){
+  loadGiftPlayers();
+  const owner=!!state.user?.isOwner;
+  return `<main class="page"><button class="back" onclick="state.screen='game';render()">← Назад</button><h2 class="center-text">🎁 ПОДАРИТЬ МОНЕТЫ</h2>
+  <p class="sub center-text">${owner?"Ты — владелец. Можешь подарить игроку любую сумму без комиссии.":`у тебя ${fmt(state.user.coins)} монет`}</p>
+  <div class="narrow">
+    <input id="gift-amount" type="number" min="${owner?1:1000}" step="1" placeholder="${owner?"Сколько подарить":"Сколько получит игрок (от 1 000)"}" oninput="updateGiftPreview()">
+    <div id="gift-preview" class="gift-preview"></div>
+    <div id="gift-status" class="success"></div>
+    <div class="list">${state.giftPlayers.length?state.giftPlayers.map(p=>{
+      const n=full(p),sel=state.giftRecipient===n;
+      return `<button class="player-select ${sel?"selected":""}" onclick="state.giftRecipient='${esc(n).replace(/'/g,"\\'")}';render()"><span>${animal(p.animal).emoji}</span><b>${esc(n)}</b><i class="${online(p)?"online":"offline"}"></i></button>`
+    }).join(""):`<div class="empty">Пока больше никого нет в зоопарке.</div>`}</div>
+    <button class="stamp primary" onclick="giveGift()">🎁 ${owner?"ПОДАРИТЬ МОНЕТЫ":"ПОДАРИТЬ"}</button>
+  </div></main>`;
+}
+function updateGiftPreview(){
+  const el=$("#gift-preview"),input=$("#gift-amount"),u=state.user;
+  if(!el||!input||!u)return;
+  const a=Math.floor(Number(input.value));
+  if(!a){el.textContent="";return}
+  if(u.isOwner){el.textContent=`Получатель получит ${fmt(a)} монет. Комиссия: 0.`;return}
+  const total=Math.ceil(a*1.1),fee=total-a;
+  el.textContent=a<1000?`Минимум — 1 000 монет получателю.`:`С тебя спишется ${fmt(total)}: ${fmt(a)} получит игрок + ${fmt(fee)} (10%) владельцу.`;
+}
+function eventsView(){
+ const a=state.event&&state.event.expiresAt>Date.now()?state.event:null;
+ return `<main class="page"><button class="back" onclick="state.screen='game';render()">← Назад</button><h2 class="center-text">🎉 СОБЫТИЯ</h2>
+ ${a?`<div class="event-active"><b>${EVENTS[a.type].emoji} ${EVENTS[a.type].label}</b><small>x${a.mult} — ещё ${timeLeft(a.expiresAt)}</small></div>`:""}
+ <div class="narrow event-list">${Object.entries(EVENTS).filter(([k,c])=>!c.ownerOnly||state.user.isOwner).map(([k,c])=>{
+ const dis=a||(c.cost>0&&state.user.coins<c.cost);
+ return `<button class="stamp event-btn" ${dis?"disabled":""} onclick="startEvent('${k}')"><b>${c.emoji} ${c.label} · x${c.mult} · ${c.minutes} мин</b><span>${c.cost?fmt(c.cost)+" монет":"владелец"}</span></button>`}).join("")}</div></main>`;
+}
+function timeLeft(t){let s=Math.max(0,Math.floor((t-Date.now())/1000));return `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`}
+
+function removeOwnerBoosts(){
+  const all=players(); let count=0;
+  const now=Date.now();
+  for(const p of all){
+    if(Number(p.boostExpiresAt||0)>now && Number(p.boostMultiplier||1)>1){
+      p.boostMultiplier=1;
+      p.boostExpiresAt=0;
+      p.ownerBoost=false;
+      save(p);
+      if(state.user && full(state.user)===full(p)){
+        state.user={...p};
+      }
+      count++;
+    }else if(p.ownerBoost){
+      p.ownerBoost=false;
+      p.boostMultiplier=1;
+      p.boostExpiresAt=0;
+      save(p);
+      if(state.user && full(state.user)===full(p)) state.user={...p};
+    }
+  }
+  notice(`⚡ Убрано активных бустов: ${count}.`);
+  ownerRefresh();
+  render();
+}
+function removePlayerCoins(n){
+  const p=get(n);
+  if(!p)return;
+  p.coins=0;
+  save(p);
+  notice(`🪙 Монеты игрока ${n} обнулены.`);
+  ownerRefresh();render();
+}
+function blockPlayer(n){
+  const p=get(n);
+  if(!p)return;
+  p.blocked=true;
+  save(p);
+  if(state.user && full(state.user)===n){
+    state.user=null;
+    state.screen="auth";
+  }
+  notice(`🚫 Игрок ${n} заблокирован.`);
+  ownerRefresh();render();
+}
+function unblockPlayer(n){
+  const p=get(n);
+  if(!p)return;
+  p.blocked=false;
+  save(p);
+  notice(`✅ Игрок ${n} разблокирован.`);
+  ownerRefresh();render();
+}
+function ownerView(){
+ const list=state.players;
+ return `<main class="owner-page"><div class="owner-wrap"><div class="owner-head"><b>👑 ПАНЕЛЬ ВЛАДЕЛЬЦА</b><button class="back darkback" onclick="state.screen='game';render()">К игре</button></div>
+ <section class="owner-box"><div><b>${state.blocked?"🔒 Игра заблокирована":"🔓 Игра открыта"}</b></div><button class="${state.blocked?"green":"red"}" onclick="state.blocked=!state.blocked;saveGlobal();render()">${state.blocked?"РАЗБЛОКИРОВАТЬ":"ЗАБЛОКИРОВАТЬ"}</button></section>
+ <section class="owner-box"><b>📢 Объявление для всех</b><div class="row"><input id="broadcast" placeholder="Например: скоро ивент"><button class="gold-btn" onclick="sendBroadcast()">OK</button></div><button class="remove-announcement" onclick="state.broadcast='';saveGlobal();render()">УБРАТЬ ОБЪЯВЛЕНИЕ</button></section>
+ <section class="owner-box"><button class="owner-toggle" onclick="state.abuseOpen=!state.abuseOpen;state.abuseTarget=false;render()">⚡ Выдать буст ${state.abuseOpen?"▲":"▼"}</button>
+ ${state.abuseOpen?`<div class="stack"><div class="row"><input id="abuse-mult" type="number" value="2" placeholder="Множитель"><input id="abuse-min" type="number" value="10" placeholder="Минут"></div>
+ <button class="red wide" onclick="grantAll()">⚡ ВЫДАТЬ БУСТ ВСЕМ</button>
+ <button class="orange wide" onclick="state.abuseTarget=!state.abuseTarget;render()">👤 ${state.abuseTarget?"СКРЫТЬ ВЫБОР ИГРОКА":"ВЫДАТЬ БУСТ ОДНОМУ ИГРОКУ"}</button>
+ ${state.abuseTarget?`<div class="mini-list">${list.length?list.map(p=>`<div class="player-admin-row"><span>${online(p)?"🟢":"⚪"} ${esc(full(p))}</span><div class="admin-actions"><button onclick="grantOne('${esc(full(p)).replace(/'/g,"\\'")}')">⚡ Буст</button><button onclick="removePlayerCoins('${esc(full(p)).replace(/'/g,"\\'")}')">🪙 0 монет</button>${p.blocked?`<button onclick="unblockPlayer('${esc(full(p)).replace(/'/g,"\\'")}')">✅ Разблокировать</button>`:`<button class="danger" onclick="blockPlayer('${esc(full(p)).replace(/'/g,"\\'")}')">🚫 Заблокировать</button>`}</div></div>`).join(""):`<div class="empty">Нет игроков.</div>`}</div>`:""}
+ <button class="gray wide" onclick="removeOwnerBoosts()">🧹 УБРАТЬ ВСЕ БУСТЫ ВЛАДЕЛЬЦА</button></div>`:""}</section>
+ <div class="players-head"><b>👥 Игроки (${list.length})</b><button onclick="ownerRefresh();render()">↻</button></div>
+ <div class="owner-list">${list.length?list.map(ownerCard).join(""):`<div class="empty darkempty">В зоопарке пока никого — поделись ссылкой с друзьями.</div>`}</div>
+ </div></main>`;
+}
+function ownerCard(p){
+ const n=full(p),tmp=p.boostExpiresAt>Date.now(),bt=p.blockedUntil>Date.now();
+ return `<div class="owner-card"><div class="player-head"><b>${online(p)?"🟢":"⚪"} ${animal(p.animal).emoji} ${esc(n)}</b><strong>🪙 ${fmt(p.coins)}</strong></div>
+ <div class="badges">${p.rebirths?`<span class="purple">♻️ x${fmtMult(rebirthMult(p.rebirths))} (${p.rebirths})</span>`:""}${p.permanentTier?`<span class="gold">x${perm(p.permanentTier)} постоянный</span>`:""}${tmp?`<span class="pink">x${p.boostMultiplier} временный <button onclick="removeBoost('${esc(n).replace(/'/g,"\\'")}')">снять</button></span>`:""}${p.blockedForever?`<span class="pink">🔒 навсегда</span>`:""}${bt?`<span class="orange">🔒 ещё ~${Math.ceil((p.blockedUntil-Date.now())/60000)} мин</span>`:""}</div>
+ <div class="row compact"><input id="amt-${esc(n)}" type="number" value="50"><button class="green" onclick="adjust('${esc(n).replace(/'/g,"\\'")}',Number(document.getElementById('amt-${esc(n)}').value)||50)">＋</button><button class="red" onclick="adjust('${esc(n).replace(/'/g,"\\'")}',-(Number(document.getElementById('amt-${esc(n)}').value)||50))">−</button><button onclick="zero('${esc(n).replace(/'/g,"\\'")}' )">0</button><button class="kick" onclick="kick('${esc(n).replace(/'/g,"\\'")}')">Кик</button></div>
+ <div class="row compact"><input data-block="${esc(n)}" type="number" value="60" max="60"><button class="orange" onclick="blockTemp('${esc(n).replace(/'/g,"\\'")}')">Блок</button><button class="red darkred" onclick="blockForever('${esc(n).replace(/'/g,"\\'")}')">Навсегда</button>${p.blockedForever||bt?`<button class="green push" onclick="unblock('${esc(n).replace(/'/g,"\\'")}')">Разблок</button>`:""}</div>
+ <div class="row compact"><input data-x0="${esc(n)}" type="number" min="1" max="60" value="60"><button class="red darkred" onclick="setX0('${esc(n).replace(/'/g,"\'")}')">X0 на время</button>${p.ownerX0Until>Date.now()?`<button class="green push" onclick="clearX0('${esc(n).replace(/'/g,"\'")}')">Снять X0</button>`:""}</div>
+ ${p.comment?`<div class="comment">💬 ${esc(p.comment)}<div class="row"><input data-reply="${esc(n)}" maxlength="200" placeholder="Ответить…"><button class="gold-btn" onclick="sendReply('${esc(n).replace(/'/g,"\\'")}')">ОК</button></div>${p.ownerReply?`<small>Ты ответил: ${esc(p.ownerReply)}</small>`:""}</div>`:""}</div>`;
+}
+function gameView(){
+ const u=state.user,am=animal(u.animal),blocked=(state.blocked&&!u.isOwner)||personalBlocked(u);
+ const ev=state.event&&state.event.expiresAt>Date.now()?state.event:null,temp=u.boostExpiresAt>Date.now();
+ const remain=temp?timeLeft(u.boostExpiresAt):"", total=mult(u);
+ return `<main class="page game-page">${topbar()}
+ <div class="coin-pill">🪙 <b>${fmt(u.coins)}</b></div>
+ ${state.broadcast?`<div class="broadcast">📢 ${esc(state.broadcast)}</div>`:""}
+ ${ev?`<div class="event-pill ${ev.type==="disco"?"disco":""}">${EVENTS[ev.type].emoji} ${EVENTS[ev.type].label} x${ev.mult}</div>`:""}
+ ${state.toast?`<div class="toast ${state.toast.type==="reply"?"reply":""}">${state.toast.type==="reply"?"💬 Владелец ответил: ":"📢 "}${esc(state.toast.msg)}</div>`:""}
+ ${blocked?`<div class="blocked"><div>🔒</div><b>${personalBlocked(u)?"ТЫ ЗАБЛОКИРОВАН":"ИГРА ЗАБЛОКИРОВАНА"}</b><p>${personalBlocked(u)?(u.blockedForever?"Владелец заблокировал тебя навсегда":"Осталось "+timeLeft(u.blockedUntil)):"Владелец скоро откроет её снова"}</p></div>`:
+ `<div class="animal-zone"><button class="animal-main ${state.punch?"punch":""}" onclick="clickAnimal()"><span>${am.emoji}</span></button>${state.floaters.map(f=>`<div class="floater">${f}</div>`).join("")}</div>
+ <button class="change" onclick="state.screen='animal';render()">сменить животное</button>
+ ${total>1?`<div class="total-mult">⚡ x${fmtMult(total)} ${temp?"— ещё "+remain:""}</div>`:""}
+ <section class="shop"><label>ВРЕМЕННЫЕ БУСТЫ ${u.totalEarned>=1000?`<em>цены выросли</em>`:""}</label>${TEMP_BOOSTS.map((b,i)=>{const c=tempCost(i,u.totalEarned),can=Number(u.coins)>=Number(c)&&!temp;return `<button class="stamp shop-btn ${can?"affordable":"unaffordable"}" ${can?"":"disabled"} onclick="buyTemp(${i})"><b>⚡ x${b.mult} на ${b.minutes} мин</b><span>${fmt(c)} монет</span></button>`}).join("")}</section>
+ <section class="shop"><label>ПОСТОЯННЫЙ БУСТ</label><button class="stamp shop-btn perm ${Number(u.coins)>=Number(permCost(u.permanentTier||0))?"affordable":"unaffordable"}" ${Number(u.coins)>=Number(permCost(u.permanentTier||0))?"":"disabled"} onclick="buyPerm()"><b>x${nextPerm(u.permanentTier||0)} НАВСЕГДА</b><span>${fmt(permCost(u.permanentTier||0))} монет</span></button>${u.permanentTier?`<small>сейчас: x${perm(u.permanentTier)}</small>`:""}</section>
+ <section class="shop"><label>ПЕРЕРОЖДЕНИЕ</label>${u.rebirths>=100?`<div class="maxbox">Достигнут максимум — 100 перерождений</div>`:`<button type="button" id="rebirth-button" class="stamp shop-btn ${Number(u.coins)>=Number(rebirthCost(u.rebirths+1))?"affordable":"unaffordable"}" ${Number(u.coins)>=Number(rebirthCost(u.rebirths+1))?"":"disabled"} onclick="rebirth()"><b>♻️ Переродиться → x${fmtMult(rebirthMult(u.rebirths+1))}</b><span>${fmt(rebirthCost(u.rebirths+1))} монет</span></button>`}${u.rebirths?`<small>сейчас: x${fmtMult(rebirthMult(u.rebirths))} (${u.rebirths}/100)</small>`:""}<small>обнуляет монеты, буст и постоянный буст сохраняются</small></section>`}
+ </main>`;
+}
+function render(){
+  const app=$("#app");
+  if(!state.user||state.screen==="auth")app.innerHTML=authView();
+  else if(state.screen==="animal")app.innerHTML=animalView();
+  else if(state.screen==="help")app.innerHTML=helpView();
+  else if(state.screen==="gift")app.innerHTML=giftView();
+  else if(state.screen==="events")app.innerHTML=eventsView();
+  else if(state.screen==="owner")app.innerHTML=ownerView();
+  else app.innerHTML=gameView();
+}
+loadGlobal();render();setInterval(tick,1000);
+</script>
+<script>
+window.addEventListener("error",function(e){
+  console.error(e.error||e.message);
+  const app=document.getElementById("app");
+  if(app && !app.innerHTML.trim()){
+    app.innerHTML='<main style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;font-family:Arial;background:#fffbeb"><div style="max-width:360px;background:white;border:2px solid #1c1917;border-radius:12px;padding:20px;text-align:center"><h2 style="color:#14532d">Зоокликер</h2><p>Произошла ошибка загрузки. Попробуй обновить страницу.</p><button onclick="location.reload()" style="padding:10px 16px">Обновить</button></div></main>';
+  }
+});
+</script>
+</body>
+</html>
