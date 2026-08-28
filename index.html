@@ -1,491 +1,1199 @@
-<!doctype html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
-  <title>ЗООКЛИКЕР</title>
-  <style>
-@import url('https://fonts.googleapis.com/css2?family=Russo+One&family=PT+Sans:wght@400;700&display=swap');
-:root{--green:#14532d;--red:#b91c1c;--gold:#d97706;--paper:#fffbeb}
-*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:'PT Sans',sans-serif;color:#292524}
-body{background:var(--paper);background-image:radial-gradient(circle,rgba(28,25,23,.05) 1px,transparent 1px);background-size:15px 15px}
-button,input,textarea{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.4}
-.page{min-height:100vh;width:100%;padding:16px;position:relative}.center{display:flex;align-items:center;justify-content:center;flex-direction:column}
-.auth-wrap{width:100%;max-width:380px}.title{text-align:center;margin-bottom:24px}.tent{font-size:60px;margin-bottom:8px}.title h1,h2{font-family:'Russo One',sans-serif;color:var(--green);letter-spacing:1px;margin:0}.title h1{font-size:40px}.title p,.sub{color:#78716c;font-size:14px;margin:5px 0 0}
-.card{background:#fff;border:2px solid #1c1917;border-radius:12px}.last-login-card{width:100%;max-width:380px;padding:18px;margin-bottom:12px;text-align:center}.last-login-label{font-size:11px;letter-spacing:1px;color:#78716c;font-weight:700}.last-login-name{font-family:'Russo One',sans-serif;color:#14532d;font-size:18px;margin:8px 0 12px}.last-login-card .primary{width:100%}.forget-login{border:0;background:none;color:#78716c;text-decoration:underline;font-size:12px;margin-top:10px}.auth-card{padding:24px;display:flex;flex-direction:column;gap:12px}.row{display:flex;gap:8px}.row>*{min-width:0}.auth-card input,.auth-card textarea,.narrow>input,.owner-box input,.comment input,.compact input{width:100%;border:2px solid #d6d3d1;border-radius:6px;padding:12px;color:#292524;background:#fff;outline:0}.auth-card input:focus,.auth-card textarea:focus,input:focus{border-color:#166534}
-.stamp{border:2px solid #1c1917;border-radius:6px;box-shadow:4px 4px 0 var(--shadow,#14532d);transition:.08s;}.stamp:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--shadow,#14532d)}
-.primary{background:#d97706;color:white;padding:13px;font-family:'Russo One',sans-serif}.hint{font-size:12px;color:#78716c;text-align:center;margin:0}.error{color:#b91c1c;font-size:14px;text-align:center;min-height:18px}.notice{padding:8px;border-radius:6px;text-align:center}.notice.red{background:#fef2f2;color:#b91c1c}
-.animals{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%;max-width:380px;margin-top:22px}.animal-choice{aspect-ratio:1;border:4px solid var(--green);border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;transition:.12s}.animal-choice:active{transform:scale(.95)}.animal-choice span{font-size:42px}.animal-choice b{font-size:12px;color:#57534e}
-.back,.help-link,.change{border:0;background:none;text-decoration:underline;color:#78716c;padding:0}.back{margin-bottom:16px}.center-text{text-align:center}.help-card{max-width:380px;margin:0 auto;padding:20px;font-size:14px;color:#44403c}.help-card p{margin:0 0 12px}
-.narrow{width:100%;max-width:380px;margin:0 auto}.narrow>input{margin:12px 0}.list{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}.player-select{display:flex;align-items:center;gap:8px;width:100%;border:2px solid #d6d3d1;background:#fff;border-radius:6px;padding:10px;text-align:left}.player-select.selected{border-color:var(--green);background:#f0fdf4}.player-select i{width:8px;height:8px;border-radius:50%;margin-left:auto}.online{background:#22c55e}.offline{background:#78716c}.success{color:#166534;text-align:center;min-height:20px;font-size:14px}.empty{color:#78716c;text-align:center;font-size:14px;padding:12px}
-.event-active,.event-pill{background:#fff;border:2px solid #d97706;border-radius:12px;text-align:center}.event-active{max-width:380px;margin:0 auto 16px;padding:14px;display:flex;flex-direction:column;gap:4px}.event-active small{color:#78716c}.event-list{display:flex;flex-direction:column;gap:10px}.event-btn{display:flex;justify-content:space-between;align-items:center;padding:12px;background:#fff}.event-btn span{font-size:12px;color:#78716c}
-.game-page{display:flex;flex-direction:column;align-items:center;overflow:hidden}.topbar{width:100%;max-width:380px;display:flex;justify-content:space-between;align-items:center;margin-top:2px}.user-name{font-weight:700;font-size:14px}.top-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.icon-btn{background:#fff;border:2px solid #1c1917;border-radius:6px;padding:7px;font-size:15px}.icon-btn.dark{background:#1c1917;color:#f59e0b}.help-link{font-size:12px;margin:7px 0 12px;display:flex;gap:4px}
-.coin-pill{background:#d97706;border:4px solid #1c1917;border-radius:999px;color:#fff;padding:7px 24px;margin-bottom:12px;font-family:'Russo One',sans-serif;font-size:25px}.broadcast,.toast{position:fixed;z-index:20;top:16px;left:50%;transform:translateX(-50%);background:#1c1917;color:#fff;border-radius:9px;padding:11px 16px;max-width:320px;text-align:center;font-weight:700;box-shadow:0 8px 20px #0003}.toast{top:70px}.toast.reply{background:#166534}.event-pill{padding:7px 16px;margin-bottom:14px;font-size:14px;font-weight:700}.animal-zone{width:224px;height:224px;position:relative;display:flex;align-items:center;justify-content:center}.animal-main{width:224px;height:224px;border-radius:50%;background:#fff;border:8px solid var(--green);box-shadow:0 8px 0 var(--green);display:flex;align-items:center;justify-content:center;transition:transform .1s}.animal-main.punch{transform:scale(.9)}.animal-main span{width:176px;height:176px;border:4px solid var(--gold);border-radius:50%;background:#fffbeb;display:flex;align-items:center;justify-content:center;font-size:92px}.floater{position:absolute;top:15%;left:50%;transform:translateX(-50%);font-family:'Russo One',sans-serif;font-size:25px;color:var(--gold);animation:float .7s ease-out forwards;pointer-events:none}@keyframes float{to{transform:translate(-50%,-60px);opacity:0}}
-.change{font-size:12px;margin-top:12px}.total-mult{margin-top:16px;background:#b91c1c;color:#fff;border-radius:999px;padding:6px 16px;font-weight:700}.shop{width:100%;max-width:380px;margin-top:18px}.shop>label{display:flex;justify-content:space-between;font-size:12px;color:#78716c;font-weight:700;letter-spacing:1px;margin-bottom:8px}.shop em{font-style:normal;color:#dc2626}.shop-btn{width:100%;padding:10px 14px;background:#fff;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.shop-btn.affordable{background:#fff;opacity:1;cursor:pointer}.shop-btn.unaffordable{background:#d6d3d1!important;color:#78716c;opacity:1;cursor:not-allowed;box-shadow:4px 4px 0 #a8a29e}.shop-btn.unaffordable b,.shop-btn.unaffordable span{color:#78716c}.shop-btn b{font-family:'Russo One',sans-serif;font-size:13px}.shop-btn span,.shop small{font-size:12px;color:#78716c}.perm{background:#fffbeb}.maxbox{background:#fff;border:2px solid #1c1917;border-radius:6px;text-align:center;padding:12px;font-size:12px}.shop small{display:block;text-align:center;margin-top:4px}
-.blocked{background:#fff;border:2px solid #1c1917;border-radius:12px;padding:32px;text-align:center;max-width:300px;margin:30px auto}.blocked>div{font-size:42px}.blocked b{font-family:'Russo One',sans-serif;color:var(--green)}.blocked p{color:#78716c;font-size:14px}
-.owner-page{min-height:100vh;background:#1c1917;padding:16px;color:#fff}.owner-wrap{max-width:430px;margin:auto}.owner-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;font-family:'Russo One',sans-serif;color:#f59e0b}.darkback{color:#a8a29e}.owner-box{background:#292524;border:1px solid #44403c;border-radius:8px;padding:14px;margin-bottom:14px}.owner-box>.row{margin-top:8px}.owner-box input,.comment input{background:#44403c;border:0;color:#fff;padding:9px}.owner-box button{border:0;border-radius:6px;color:#fff;padding:9px 12px;font-weight:700}.remove-announcement{background:#57534e!important;width:100%;margin-top:8px}.owner-box .red,.owner-box .green{padding:9px 12px}.red{background:#b91c1c}.green{background:#15803d}.orange{background:#c2410c}.darkred{background:#991b1b}.gold-btn{background:#d97706!important}.wide{flex:1}.owner-toggle{background:none!important;padding:0!important}.stack{margin-top:12px;display:flex;flex-direction:column;gap:8px}.mini-list{max-height:160px;overflow:auto;display:flex;flex-direction:column;gap:4px}.mini-list button{background:#44403c;text-align:left}.players-head{display:flex;justify-content:space-between;align-items:center;margin:10px 0}.players-head button{background:none;border:0;color:#a8a29e;font-size:20px}.owner-list{display:flex;flex-direction:column;gap:8px}.owner-card{background:#292524;border:1px solid #44403c;border-radius:8px;padding:12px}.player-head{display:flex;justify-content:space-between;align-items:center;font-size:14px}.player-head strong{color:#f59e0b}.badges{display:flex;flex-wrap:wrap;gap:7px;font-size:12px;margin:8px 0}.purple{color:#c084fc}.gold{color:#fbbf24}.pink{color:#f87171}.orange{color:#fb923c}.compact{margin-top:7px}.compact input{width:58px;background:#44403c;color:#fff;border:0;padding:6px}.compact button{border:0;border-radius:5px;padding:6px 9px;color:#fff}.compact .kick{margin-left:auto;background:none;color:#a8a29e}.push{margin-left:auto}.comment{background:#1c1917;border-radius:6px;padding:8px;margin-top:8px;font-size:12px;color:#d6d3d1}.comment small{color:#4ade80;display:block;margin-top:5px}
-.darkempty{color:#78716c}.disco{animation:hue 3s linear infinite}@keyframes hue{to{filter:hue-rotate(360deg)}}
-@media(max-width:420px){.page{padding:12px}.title h1{font-size:34px}.animal-main,.animal-zone{width:210px;height:210px}.animal-main span{width:164px;height:164px;font-size:82px}}
-@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+import React, { useState, useEffect, useRef } from 'react';
+import { Crown, Coins, Zap, LogOut, Users, Megaphone, UserX, RefreshCw, Lock, Unlock, Plus, Minus, MessageCircle, Gift, PartyPopper, Repeat, HelpCircle } from 'lucide-react';
 
-.player-admin-row{background:#fafaf9;border:1px solid #d6d3d1;border-radius:8px;padding:8px;margin-bottom:7px}.admin-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}.admin-actions button{border:1px solid #a8a29e;background:#fff;border-radius:6px;padding:6px 8px;font-size:11px;font-weight:700}.admin-actions .danger{background:#fee2e2;border-color:#ef4444;color:#991b1b}.gray{background:#57534e!important;color:#fff!important;border:0;border-radius:6px;padding:9px 12px;font-weight:700}.gift-preview{min-height:20px;margin:5px 0 10px;padding:8px;border-radius:6px;background:#f5f5f4;color:#57534e;font-size:12px;text-align:center}</style>
-</head>
-<body>
-<div id="app"></div>
-
-<script>
-/* Вся логика находится внутри HTML: отдельного JS-файла нет. */
-const ANIMALS=[
-  {id:"cat",emoji:"🐱",name:"Кот"},{id:"dog",emoji:"🐶",name:"Пёс"},
-  {id:"fox",emoji:"🦊",name:"Лиса"},{id:"panda",emoji:"🐼",name:"Панда"},
-  {id:"lion",emoji:"🦁",name:"Лев"},{id:"rabbit",emoji:"🐰",name:"Кролик"},
-  {id:"bear",emoji:"🐻",name:"Медведь"},{id:"tiger",emoji:"🐯",name:"Тигр"},
-  {id:"koala",emoji:"🐨",name:"Коала"},{id:"penguin",emoji:"🐧",name:"Пингвин"}
+const ANIMALS = [
+{ id: 'cat', emoji: '🐱', name: 'Кот' },
+{ id: 'dog', emoji: '🐶', name: 'Пёс' },
+{ id: 'fox', emoji: '🦊', name: 'Лиса' },
+{ id: 'panda', emoji: '🐼', name: 'Панда' },
+{ id: 'lion', emoji: '🦁', name: 'Лев' },
+{ id: 'rabbit', emoji: '🐰', name: 'Кролик' },
+{ id: 'bear', emoji: '🐻', name: 'Медведь' },
+{ id: 'tiger', emoji: '🐯', name: 'Тигр' },
+{ id: 'koala', emoji: '🐨', name: 'Коала' },
+{ id: 'penguin', emoji: '🐧', name: 'Пингвин' },
 ];
-const OWNER_CODE="BOSS2026", SCALE_THRESHOLD=1000, ONLINE_MS=30000;
-const TEMP_BOOSTS=[
-  {mult:2,baseCost:200,scaledCost:2000,minutes:10},
-  {mult:4,baseCost:500,scaledCost:5000,minutes:10},
-  {mult:10,baseCost:2000,scaledCost:15000,minutes:20}
+
+const OWNER_CODE = 'BOSS2026';
+const SCALE_THRESHOLD = 1000;
+const TEMP_BOOSTS = [
+{ mult: 2, baseCost: 200, scaledCost: 2000, minutes: 10 },
+{ mult: 4, baseCost: 500, scaledCost: 5000, minutes: 10 },
+{ mult: 10, baseCost: 2000, scaledCost: 15000, minutes: 20 },
 ];
-const EVENTS={
-  evening:{cost:100000,mult:1.5,minutes:10,emoji:"🌆",label:"Вечернее событие"},
-  disco:{cost:500000,mult:2.5,minutes:15,emoji:"🪩",label:"Диско"},
-  gold:{cost:0,mult:10,minutes:20,emoji:"✨",label:"Gold Event",ownerOnly:true}
+const PERM_BASE_COST = 150;
+const REBIRTH_BASE_COST = 50;
+const REBIRTH_COST_MULT = 8;
+const REBIRTH_MAX = 100;
+const REBIRTH_BASE_MULT = 1.5;
+const EVENTS = {
+evening: { cost: 100000, mult: 1.5, minutes: 10, emoji: '🌆', label: 'Вечернее событие' },
+disco: { cost: 500000, mult: 2.5, minutes: 15, emoji: '🪩', label: 'Диско' },
+gold: { cost: 0, mult: 10, minutes: 20, emoji: '✨', label: 'Gold Event', ownerOnly: true },
 };
-const state={
-  screen:"auth",user:null,blocked:false,broadcast:"",event:null,
-  toast:null,reply:null,players:[],abuseOpen:false,abuseTarget:false,
-  giftPlayers:[],giftRecipient:null,floaters:[],punch:false
-};
-const $=s=>document.querySelector(s);
-const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
-const full=p=>`${p.firstName} ${p.lastName}`;
-const key=n=>"zoo-player:"+n;
-const LAST_ACCOUNT_KEY="zoo-last-account";
-function getLastAccount(){
-  try{return JSON.parse(localStorage.getItem(LAST_ACCOUNT_KEY)||"null")}catch{return null}
+const ONLINE_MS = 30000;
+const HEARTBEAT_MS = 15000;
+const GREEN = '#14532d';
+const RED = '#b91c1c';
+const GOLD = '#d97706';
+
+const GLOBAL_STYLE = @import url('https://fonts.googleapis.com/css2?family=Russo+One&family=PT+Sans:wght@400;700&display=swap'); .font-display { font-family: 'Russo One', sans-serif; } .font-body { font-family: 'PT Sans', sans-serif; } .paper-bg { background-color: #fffbeb; background-image: radial-gradient(circle, rgba(28,25,23,0.05) 1px, transparent 1px); background-size: 15px 15px; } .stamp-btn { box-shadow: 4px 4px 0 var(--sc, ${GREEN}); transition: transform 0.08s linear, box-shadow 0.08s linear; }
+.stamp-btn:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--sc, ${GREEN}); } @keyframes floatUp { 0% { transform: translateX(-50%) translateY(0); opacity: 1; } 100% { transform: translateX(-50%) translateY(-60px); opacity: 0; } } .floater { animation: floatUp 0.8s ease-out forwards; } @keyframes ringOut { 0% { transform: scale(0.9); opacity: 0.7; } 100% { transform: scale(1.5); opacity: 0; } } .ripple { animation: ringOut 0.5s ease-out forwards; } @keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 0 0 rgba(217,119,6,0.4); } 50% { box-shadow: 0 0 0 8px rgba(217,119,6,0); } } .pulse-glow { animation: pulseGlow 1.5s ease-in-out infinite; } @keyframes discoHue { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } } .disco-spin { animation: discoHue 3s linear infinite; } @media (prefers-reduced-motion: reduce) { .floater, .ripple, .stamp-btn, .pulse-glow, .disco-spin { animation: none !important; transition: none !important; } };
+
+function fullNameOf(p) {
+return ${p.firstName} ${p.lastName};
 }
-function rememberLastAccount(p){
-  localStorage.setItem(LAST_ACCOUNT_KEY,JSON.stringify({
-    firstName:p.firstName,lastName:p.lastName
-  }));
+function keyOf(fullName) {
+return player:${fullName}`;
 }
-function forgetLastAccount(){localStorage.removeItem(LAST_ACCOUNT_KEY)}
-function loginLast(){
-  const a=getLastAccount();
-  if(!a)return;
-  const p=get(`${a.firstName} ${a.lastName}`);
-  if(!p){forgetLastAccount();render();return}
-  state.user={...p,kicked:false,lastSeen:Date.now()};
-  save(state.user);
-  loadGlobal();
-  rememberLastAccount(state.user);state.screen=state.user.animal?"game":"animal";
-  render();
+function permMultForTier(tier) {
+return tier > 0 ? Math.pow(2, tier) : 1;
+}
+function nextPermMult(tier) {
+return Math.pow(2, tier + 1);
+}
+function nextPermCost(tier) {
+return PERM_BASE_COST * Math.pow(2, tier);
+}
+function rebirthMultiplier(rebirths) {
+return rebirths > 0 ? REBIRTH_BASE_MULT * Math.pow(2, rebirths - 1) : 1;
+}
+function rebirthCostFor(nextNum) {
+return REBIRTH_BASE_COST * Math.pow(REBIRTH_COST_MULT, nextNum - 1);
+}
+function isPersonallyBlocked(u) {
+if (!u) return false;
+if (u.blockedForever) return true;
+if (u.blockedUntil && u.blockedUntil > Date.now()) return true;
+return false;
+}
+function isOnline(p) {
+return !!(p.lastSeen && (Date.now() - p.lastSeen < ONLINE_MS));
+}
+function fmt(n) {
+return Math.floor(n || 0).toLocaleString('ru-RU');
+}
+function fmtMult(n) {
+return Number.isInteger(n) ? String(n) : n.toFixed(1);
+}
+function activeMultiplier(u, activeEvent) {
+const rebirth = rebirthMultiplier(u.rebirths || 0);
+const perm = permMultForTier(u.permanentTier || 0);
+const temp = (u.boostExpiresAt && u.boostExpiresAt > Date.now()) ? u.boostMultiplier : 1;
+const event = (activeEvent && activeEvent.expiresAt > Date.now()) ? activeEvent.mult : 1;
+return rebirth * perm * temp * event;
+}
+function tempBoostCost(idx, totalEarned) {
+const t = TEMP_BOOSTS[idx];
+return (totalEarned || 0) >= SCALE_THRESHOLD ? t.scaledCost : t.baseCost;
 }
 
-const fmt=n=>Math.floor(Number(n)||0).toLocaleString("ru-RU");
-const fmtMult=n=>Number.isInteger(n)?String(n):Number(n).toFixed(1);
-const perm=t=>t>0?2**t:1;
-const nextPerm=t=>2**(t+1);
-const permCost=t=>150*2**t;
-const rebirthMult=r=>r>0?1.5*2**(r-1):1;
-const rebirthCost=n=>50*8**(n-1);
-const animal=id=>ANIMALS.find(a=>a.id===id)||ANIMALS[0];
-const online=p=>p.lastSeen && Date.now()-p.lastSeen<ONLINE_MS;
-const personalBlocked=p=>!!p&&(p.blockedForever||(p.blockedUntil&&p.blockedUntil>Date.now()));
-const tempCost=(i,total)=>(Number(total)||0)>=SCALE_THRESHOLD?TEMP_BOOSTS[i].scaledCost:TEMP_BOOSTS[i].baseCost;
-const mult=p=>{
-  if(!p)return 1;
-  const reb=rebirthMult(p.rebirths||0), pe=perm(p.permanentTier||0);
-  if(p.ownerX0Until&&p.ownerX0Until<=Date.now()){p.ownerX0Until=0;save(p)}
-  if(p.ownerX0Until>Date.now())return 0;
-  const tb=p.boostExpiresAt>Date.now()?p.boostMultiplier:1;
-  const ev=state.event&&state.event.expiresAt>Date.now()?state.event.mult:1;
-  return reb*pe*tb*ev;
+export default function ZooClickerGame() {
+const [screen, setScreen] = useState('auth');
+const [user, setUser] = useState(null);
+const userRef = useRef(null);
+useEffect(() => { userRef.current = user; }, [user]);
+
+const [firstName, setFirstName] = useState('');
+const [lastName, setLastName] = useState('');
+const [password, setPassword] = useState('');
+const [ownerCodeInput, setOwnerCodeInput] = useState('');
+const [commentInput, setCommentInput] = useState('');
+const [authError, setAuthError] = useState('');
+const [authLoading, setAuthLoading] = useState(false);
+const [kickedNotice, setKickedNotice] = useState(false);
+
+const [floaters, setFloaters] = useState([]);
+const [ripples, setRipples] = useState([]);
+const [isPunching, setIsPunching] = useState(false);
+const [, setTick] = useState(0);
+
+const [gameState, setGameState] = useState({ blocked: false, broadcastMessage: '', broadcastId: 0, activeEvent: null });
+const seenBroadcastRef = useRef(0);
+const seenReplyRef = useRef(0);
+const [broadcastToast, setBroadcastToast] = useState(null);
+const [replyToast, setReplyToast] = useState(null);
+
+const [players, setPlayers] = useState([]);
+const [broadcastInput, setBroadcastInput] = useState('');
+const [amountInputs, setAmountInputs] = useState({});
+const [blockMinuteInputs, setBlockMinuteInputs] = useState({});
+const [replyInputs, setReplyInputs] = useState({});
+
+const [abuseOpen, setAbuseOpen] = useState(false);
+const [abuseMult, setAbuseMult] = useState('2');
+const [abuseMinutes, setAbuseMinutes] = useState('10');
+const [abuseTarget, setAbuseTarget] = useState(null);
+
+const [giftAmount, setGiftAmount] = useState('');
+const [giftRecipient, setGiftRecipient] = useState(null);
+const [giftPlayers, setGiftPlayers] = useState([]);
+const [giftStatus, setGiftStatus] = useState('');
+
+const lastWriteRef = useRef(0);
+const pendingWriteRef = useRef(null);
+const lastClickRef = useRef(0);
+const lastHeartbeatRef = useRef(0);
+
+useEffect(() => {
+const t = setInterval(() => setTick(x => x + 1), 1000);
+return () => clearInterval(t);
+}, []);
+
+async function getPlayer(fullName) {
+try {
+const res = await window.storage.get(keyOf(fullName), true);
+return res ? JSON.parse(res.value) : null;
+} catch {
+return null;
+}
+}
+async function savePlayer(data) {
+try {
+await window.storage.set(keyOf(fullNameOf(data)), JSON.stringify(data), true);
+} catch (e) {
+console.error('save player failed', e);
+}
+}
+async function getGameStateStorage() {
+try {
+const res = await window.storage.get('game-state', true);
+return res ? JSON.parse(res.value) : { blocked: false, broadcastMessage: '', broadcastId: 0, activeEvent: null };
+} catch {
+return { blocked: false, broadcastMessage: '', broadcastId: 0, activeEvent: null };
+}
+}
+async function saveGameStateStorage(data) {
+try {
+await window.storage.set('game-state', JSON.stringify(data), true);
+} catch (e) { console.error(e); }
+}
+async function getPlayerList() {
+try {
+const res = await window.storage.get('player-list', true);
+return res ? JSON.parse(res.value) : [];
+} catch {
+return [];
+}
+}
+async function addToPlayerList(fullName) {
+const list = await getPlayerList();
+if (!list.includes(fullName)) {
+list.push(fullName);
+try {
+await window.storage.set('player-list', JSON.stringify(list), true);
+} catch (e) { console.error(e); }
+}
+}
+
+async function handleAuth() {
+const fn = firstName.trim();
+const ln = lastName.trim();
+setAuthError('');
+if (!fn || !ln || !password) {
+setAuthError('Введи имя, фамилию и пароль.');
+return;
+}
+const bad = /[\s/\'"]/;
+if (bad.test(fn) || bad.test(ln)) {
+setAuthError('Имя и фамилия без пробелов и кавычек.');
+return;
+}
+if (fn.length > 20 || ln.length > 20) {
+setAuthError('Имя и фамилия должны быть короче 20 символов.');
+return;
+}
+const fullName = ``${fn} ${ln};
+setAuthLoading(true);
+const existing = await getPlayer(fullName);
+const gs = await getGameStateStorage();
+if (existing) {
+if (existing.password !== password) {
+setAuthError('Неверный пароль.');
+setAuthLoading(false);
+return;
+}
+const toUse = { ...existing, kicked: false, lastSeen: Date.now() };
+await savePlayer(toUse);
+setUser(toUse);
+setGameState(gs);
+seenBroadcastRef.current = gs.broadcastId;
+seenReplyRef.current = existing.ownerReplyId || 0;
+setScreen(toUse.animal ? 'game' : 'animal');
+} else {
+const wantsOwner = ownerCodeInput.trim().toUpperCase() === OWNER_CODE;
+const fresh = {
+firstName: fn,
+lastName: ln,
+password,
+animal: null,
+coins: 0,
+totalEarned: 0,
+isOwner: wantsOwner,
+boostMultiplier: 1,
+boostExpiresAt: null,
+permanentTier: 0,
+rebirths: 0,
+blockedForever: false,
+blockedUntil: null,
+kicked: false,
+comment: commentInput.trim().slice(0, 200),
+ownerReply: '',
+ownerReplyId: 0,
+lastSeen: Date.now(),
 };
-function save(p){
-  try{localStorage.setItem(key(full(p)),JSON.stringify(p));}
-  catch(e){console.warn("Не удалось сохранить данные",e);}
+await savePlayer(fresh);
+await addToPlayerList(fullName);
+setUser(fresh);
+setGameState(gs);
+seenBroadcastRef.current = gs.broadcastId;
+seenReplyRef.current = 0;
+setScreen('animal');
 }
-function get(n){
-  try{return JSON.parse(localStorage.getItem(key(n)))||null}catch{return null}
+setAuthLoading(false);
 }
-function names(){return JSON.parse(localStorage.getItem("zoo-players")||"[]")}
-function addName(n){let a=names();if(!a.includes(n)){a.push(n);localStorage.setItem("zoo-players",JSON.stringify(a))}}
-function saveGlobal(){
-  localStorage.setItem("zoo-global",JSON.stringify({
-    blocked:state.blocked,broadcast:state.broadcast,event:state.event
-  }));
-}
-function loadGlobal(){
-  try{Object.assign(state,JSON.parse(localStorage.getItem("zoo-global")||"{}"))}catch{}
-}
-function players(){return names().map(get).filter(Boolean)}
-function notice(msg,type="normal"){
-  state.toast={msg,type}; render();
-  setTimeout(()=>{if(state.toast&&state.toast.msg===msg){state.toast=null;render()}},type==="reply"?8000:5000);
-}
-function login(){
-  const fn=$("#fn").value.trim(),ln=$("#ln").value.trim(),pw=$("#pw").value;
-  const owner=$("#owner").value.trim().toUpperCase(),comment=$("#comment").value.trim();
-  const err=$("#auth-error");
-  err.textContent="";
-  if(!fn||!ln||!pw){err.textContent="Введи имя, фамилию и пароль.";return}
-  if(/[\\s/\\'"]/.test(fn)||/[\\s/\\'"]/.test(ln)){err.textContent="Имя и фамилия без пробелов и кавычек.";return}
-  if(fn.length>20||ln.length>20){err.textContent="Имя и фамилия должны быть короче 20 символов.";return}
-  const n=`${fn} ${ln}`, old=get(n);
-  if(old){
-    if(old.password!==pw){err.textContent="Неверный пароль.";return}
-    state.user={...old,kicked:false,lastSeen:Date.now()};save(state.user);
-    state.screen=state.user.animal?"game":"animal";
-  }else{
-    state.user={firstName:fn,lastName:ln,password:pw,animal:null,coins:0,totalEarned:0,
-      isOwner:owner===OWNER_CODE,boostMultiplier:1,boostExpiresAt:0,permanentTier:0,
-      rebirths:0,blockedForever:false,blockedUntil:0,kicked:false,comment:comment.slice(0,200),
-      ownerReply:"",ownerReplyId:0,lastSeen:Date.now()};
-    save(state.user);addName(n);rememberLastAccount(state.user);state.screen="animal";
-  }
-  loadGlobal();render();
-}
-function logout(){state.user=null;state.screen="auth";render()}
-function chooseAnimal(id){state.user.animal=id;save(state.user);state.screen="game";render()}
-function clickAnimal(){
-  const u=state.user;
-  if(!u||((state.blocked&&!u.isOwner)||personalBlocked(u)))return;
-  const gain=Math.max(1,Math.round(mult(u)));
-  if(mult(u)===0){u.lastSeen=Date.now();save(u);if(coin)coin.textContent=fmt(u.coins);return}
-  u.coins+=gain;u.totalEarned+=gain;u.lastSeen=Date.now();save(u);
-  state.floaters.push("+"+gain);state.punch=true;
-  const coin=document.querySelector(".coin-pill b");
-  if(coin) coin.textContent=fmt(u.coins);
-  const btn=document.querySelector(".animal-main");
-  if(btn) btn.classList.add("punch");
-  const zone=document.querySelector(".animal-zone");
-  if(zone){
-    const f=document.createElement("div");f.className="floater";f.textContent="+"+gain;zone.appendChild(f);
-    setTimeout(()=>f.remove(),700);
-  }
-  setTimeout(()=>{state.punch=false;if(btn)btn.classList.remove("punch");},120);
-}
-function buyTemp(i){
-  const u=state.user,b=TEMP_BOOSTS[i],cost=tempCost(i,u.totalEarned);
-  if(u.boostExpiresAt>Date.now()){notice("Временный буст уже активен.");return}
-  if(Number(u.coins)<Number(cost)){notice(`Нужно ещё ${fmt(cost-u.coins)} монет.`);return}
-  u.coins-=cost;u.boostMultiplier=b.mult;u.boostExpiresAt=Date.now()+b.minutes*60000;save(u);render();
-}
-function buyPerm(){
-  const u=state.user,t=u.permanentTier||0,c=permCost(t);
-  if(Number(u.coins)<Number(c)){notice(`Нужно ещё ${fmt(c-u.coins)} монет.`);return}
-  u.coins-=c;u.permanentTier=t+1;save(u);render();
-}
-function rebirth(){
-  const u=state.user;
-  if(!u)return;
-  const n=Number(u.rebirths||0)+1;
-  const c=Number(rebirthCost(n));
-  const coins=Number(u.coins)||0;
-  if(n>100){notice("Достигнут максимум — 100 перерождений.");return}
-  if(coins<c){notice(`Для перерождения нужно ${fmt(c)} монет. У тебя ${fmt(coins)}.`);return}
-  u.coins=0;
-  u.rebirths=n;
-  save(u);
-  state.user={...u};
-  notice(`♻️ Перерождение! Монеты обнулены. Теперь множитель x${fmtMult(rebirthMult(n))}.`,"normal");
-  render();
-}
-function startEvent(type){
-  const u=state.user,c=EVENTS[type];
-  if(!c||c.ownerOnly&&!u.isOwner||state.event&&state.event.expiresAt>Date.now())return;
-  if(u.coins<c.cost)return;
-  u.coins-=c.cost;save(u);
-  state.event={type,mult:c.mult,expiresAt:Date.now()+c.minutes*60000};saveGlobal();render();
-}
-function giveGift(){
-  const amount=Math.floor(Number($("#gift-amount").value));
-  const to=state.giftRecipient,u=state.user;
-  const owner=!!u?.isOwner;
-  if(!to||!Number.isFinite(amount)||amount<=0){
-    $("#gift-status").textContent="Выбери игрока и сумму.";
-    return;
-  }
-  if(!owner && amount<1000){
-    $("#gift-status").textContent="Минимальный подарок — 1 000 монет получателю.";
-    return;
-  }
-  const total=owner?amount:Math.ceil(amount*1.10);
-  const fee=owner?0:total-amount;
-  if(!owner && total>Number(u.coins)){
-    $("#gift-status").textContent=`Нужно ${fmt(total)} монет: ${fmt(amount)} получит игрок + ${fmt(fee)} (10%) владельцу.`;
-    return;
-  }
-  const p=get(to);
-  if(!p){$("#gift-status").textContent="Игрок не найден.";return}
-  if(full(p)===full(u)){$("#gift-status").textContent="Нельзя подарить монеты самому себе.";return}
-  p.coins+=amount;
-  if(!owner)u.coins-=total;
-  save(p);
-  if(!owner){
-    const ownerPlayer=players().find(x=>x.isOwner);
-    if(ownerPlayer){ownerPlayer.coins+=fee;ownerPlayer.totalEarned=(ownerPlayer.totalEarned||0)+fee;save(ownerPlayer)}
-  }
-  $("#gift-status").textContent=owner
-    ? `Подарено ${fmt(amount)} монет игроку ${to}!`
-    : `Игрок получит ${fmt(amount)} монет. Списано ${fmt(total)}; ${fmt(fee)} (10%) получил владелец.`;
-  state.giftRecipient=null;
-  loadGiftPlayers();
-  render();
-}
-function loadGiftPlayers(){state.giftPlayers=players().filter(p=>full(p)!==full(state.user))}
-function ownerRefresh(){state.players=players().filter(p=>full(p)!==full(state.user))}
-function adjust(n,d){const p=get(n);if(!p)return;p.coins=Math.max(0,p.coins+d);save(p);ownerRefresh();render()}
-function zero(n){const p=get(n);if(!p)return;p.coins=0;save(p);ownerRefresh();render()}
-function removeBoost(n){const p=get(n);if(!p)return;p.boostMultiplier=1;p.boostExpiresAt=0;save(p);ownerRefresh();render()}
-function setX0(n){const p=get(n);if(!p)return;const min=Math.min(60,Math.max(1,Number(document.querySelector(`[data-x0="${CSS.escape(n)}"]`)?.value)||60));p.ownerX0Until=Date.now()+min*60000;save(p);ownerRefresh();render();notice(`🚫 X0 включён для ${n} на ${min} мин.`)}
-function clearX0(n){const p=get(n);if(!p)return;p.ownerX0Until=0;save(p);ownerRefresh();render();notice(`✅ X0 снят с ${n}.`)}
 
-function kick(n){const p=get(n);if(!p)return;p.kicked=true;save(p);ownerRefresh();render()}
-function blockTemp(n){
-  const min=Number(document.querySelector(`[data-block="${CSS.escape(n)}"]`)?.value)||10,p=get(n);
-  if(!p)return;p.blockedForever=false;p.blockedUntil=Date.now()+min*60000;save(p);ownerRefresh();render();
+function handleLogout() {
+setUser(null);
+setScreen('auth');
+setFirstName('');
+setLastName('');
+setPassword('');
+setOwnerCodeInput('');
+setCommentInput('');
 }
-function blockForever(n){const p=get(n);if(!p)return;p.blockedForever=true;p.blockedUntil=0;save(p);ownerRefresh();render()}
-function unblock(n){const p=get(n);if(!p)return;p.blockedForever=false;p.blockedUntil=0;save(p);ownerRefresh();render()}
-function sendBroadcast(){
-  const v=$("#broadcast").value.trim();if(!v)return;state.broadcast=v;saveGlobal();$("#broadcast").value="";render();
-}
-function sendReply(n){
-  const el=document.querySelector(`[data-reply="${CSS.escape(n)}"]`),v=el?.value.trim();if(!v)return;
-  const p=get(n);if(!p)return;p.ownerReply=v.slice(0,200);p.ownerReplyId=(p.ownerReplyId||0)+1;save(p);ownerRefresh();render();
-}
-function grantAll(){
-  const m=Number($("#abuse-mult").value)||2,min=Number($("#abuse-min").value)||10,all=players();
-  for(const p of all){p.boostMultiplier=m;p.boostExpiresAt=Date.now()+min*60000;p.ownerBoost=true;save(p)}
-  notice(`⚡ Буст x${m} выдан ${all.length} игрокам на ${min} мин.`);
-  ownerRefresh();render();
-}
-function grantOne(n){
-  const m=Number($("#abuse-mult").value)||2,min=Number($("#abuse-min").value)||10,p=get(n);
-  if(!p)return;
-  p.boostMultiplier=m;p.boostExpiresAt=Date.now()+min*60000;p.ownerBoost=true;save(p);
-  notice(`⚡ Буст x${m} выдан игроку ${n} на ${min} мин.`);
-  ownerRefresh();render();
-}
-function tick(){
-  if(state.user){
-    const p=get(full(state.user));
-    if(p&&p.kicked){p.kicked=false;save(p);state.user=null;state.screen="auth";render();return}
-    if(p) state.user={...state.user,...p};
-  }
-  loadGlobal();
-  updateLiveLabels();
-}
-function updateLiveLabels(){
-  const u=state.user;
-  if(!u)return;
-  const coin=document.querySelector(".coin-pill b");
-  if(coin)coin.textContent=fmt(u.coins);
-  const multEl=document.querySelector(".total-mult");
-  if(multEl){
-    const total=mult(u),temp=u.boostExpiresAt>Date.now();
-    multEl.textContent=`⚡ x${fmtMult(total)} ${temp?"— ещё "+timeLeft(u.boostExpiresAt):""}`;
-  }
-  const ev=document.querySelector(".event-active small");
-  if(ev&&state.event)ev.textContent=`x${state.event.mult} — ещё ${timeLeft(state.event.expiresAt)}`;
-}
-function topbar(){
-  const u=state.user;
-  return `<div class="topbar">
-    <div class="user-name">${u.isOwner?"👑 ":""}${esc(full(u))}</div>
-    <div class="top-actions">
-      <button class="icon-btn" onclick="state.screen='events';render()">🎉</button>
-      <button class="icon-btn" onclick="state.screen='gift';loadGiftPlayers();render()">🎁</button>
-      ${u.isOwner?`<button class="icon-btn dark" onclick="state.screen='owner';ownerRefresh();render()">👑</button>`:""}
-      <button class="icon-btn" onclick="logout()">↪</button>
-    </div>
-  </div>
-  <button class="help-link" onclick="state.screen='help';render()">❓ как играть?</button>`;
-}
-function authView(){
- const last=getLastAccount();
- return `<main class="page center"><div class="auth-wrap">
-   <div class="title"><div class="tent">🎪</div><h1>ЗООКЛИКЕР</h1><p>жми на животное — получай монеты</p></div>
-   ${last?`<div class="card last-login-card">
-      <div class="last-login-label">ПОСЛЕДНИЙ ВХОД</div>
-      <div class="last-login-name">👤 ${esc(last.firstName)} ${esc(last.lastName)}</div>
-      <button class="stamp primary" onclick="loginLast()">ВОЙТИ В ПОСЛЕДНИЙ АККАУНТ</button>
-      <button class="forget-login" onclick="forgetLastAccount();render()">Войти в другой аккаунт</button>
-   </div>`:""}
-   <div class="card auth-card">
-    ${state.toast?`<div class="notice red">${esc(state.toast.msg)}</div>`:""}
-    <div class="row"><input id="fn" placeholder="Имя" maxlength="20"><input id="ln" placeholder="Фамилия" maxlength="20"></div>
-    <input id="pw" type="password" placeholder="Пароль">
-    <input id="owner" placeholder="Код владельца (не обязательно)">
-    <textarea id="comment" rows="2" maxlength="200" placeholder="Комментарий владельцу (не обязательно)"></textarea>
-    <div id="auth-error" class="error"></div>
-    <button class="stamp primary" onclick="login()">ВОЙТИ</button>
-    <p class="hint">Новые имя и фамилия создадут аккаунт. Существующие — нужен пароль.</p>
-   </div>
- </div></main>`;
-}
-function animalView(){
- return `<main class="page center"><h2>ВЫБЕРИ ЖИВОТНОЕ</h2><p class="sub">потом можно поменять</p>
- <div class="animals">${ANIMALS.map(a=>`<button class="animal-choice" onclick="chooseAnimal('${a.id}')"><span>${a.emoji}</span><b>${a.name}</b></button>`).join("")}</div></main>`;
-}
-function helpView(){
- return `<main class="page"><button class="back" onclick="state.screen='game';render()">← Назад</button><h2 class="center-text">❓ КАК ИГРАТЬ</h2>
- <div class="card help-card"><p>🐾 Жми на животное — за каждый тап получаешь монеты.</p><p>⚡ Временные бусты ускоряют заработок на время. После 1000 накопленных монет они дорожают.</p><p>💠 Постоянный буст навсегда удваивает множитель — с каждой покупкой дороже вдвое.</p><p>♻️ Перерождение обнуляет монеты, зато навсегда усиливает множитель. До 100 перерождений.</p><p>🎉 События дают буст игрокам.</p><p>🎁 Монетами можно делиться с другими игроками.</p><p>👑 У игры есть владелец — он может как помогать, так и мешать.</p></div></main>`;
-}
-function giftView(){
-  loadGiftPlayers();
-  const owner=!!state.user?.isOwner;
-  return `<main class="page"><button class="back" onclick="state.screen='game';render()">← Назад</button><h2 class="center-text">🎁 ПОДАРИТЬ МОНЕТЫ</h2>
-  <p class="sub center-text">${owner?"Ты — владелец. Можешь подарить игроку любую сумму без комиссии.":`у тебя ${fmt(state.user.coins)} монет`}</p>
-  <div class="narrow">
-    <input id="gift-amount" type="number" min="${owner?1:1000}" step="1" placeholder="${owner?"Сколько подарить":"Сколько получит игрок (от 1 000)"}" oninput="updateGiftPreview()">
-    <div id="gift-preview" class="gift-preview"></div>
-    <div id="gift-status" class="success"></div>
-    <div class="list">${state.giftPlayers.length?state.giftPlayers.map(p=>{
-      const n=full(p),sel=state.giftRecipient===n;
-      return `<button class="player-select ${sel?"selected":""}" onclick="state.giftRecipient='${esc(n).replace(/'/g,"\\'")}';render()"><span>${animal(p.animal).emoji}</span><b>${esc(n)}</b><i class="${online(p)?"online":"offline"}"></i></button>`
-    }).join(""):`<div class="empty">Пока больше никого нет в зоопарке.</div>`}</div>
-    <button class="stamp primary" onclick="giveGift()">🎁 ${owner?"ПОДАРИТЬ МОНЕТЫ":"ПОДАРИТЬ"}</button>
-  </div></main>`;
-}
-function updateGiftPreview(){
-  const el=$("#gift-preview"),input=$("#gift-amount"),u=state.user;
-  if(!el||!input||!u)return;
-  const a=Math.floor(Number(input.value));
-  if(!a){el.textContent="";return}
-  if(u.isOwner){el.textContent=`Получатель получит ${fmt(a)} монет. Комиссия: 0.`;return}
-  const total=Math.ceil(a*1.1),fee=total-a;
-  el.textContent=a<1000?`Минимум — 1 000 монет получателю.`:`С тебя спишется ${fmt(total)}: ${fmt(a)} получит игрок + ${fmt(fee)} (10%) владельцу.`;
-}
-function eventsView(){
- const a=state.event&&state.event.expiresAt>Date.now()?state.event:null;
- return `<main class="page"><button class="back" onclick="state.screen='game';render()">← Назад</button><h2 class="center-text">🎉 СОБЫТИЯ</h2>
- ${a?`<div class="event-active"><b>${EVENTS[a.type].emoji} ${EVENTS[a.type].label}</b><small>x${a.mult} — ещё ${timeLeft(a.expiresAt)}</small></div>`:""}
- <div class="narrow event-list">${Object.entries(EVENTS).filter(([k,c])=>!c.ownerOnly||state.user.isOwner).map(([k,c])=>{
- const dis=a||(c.cost>0&&state.user.coins<c.cost);
- return `<button class="stamp event-btn" ${dis?"disabled":""} onclick="startEvent('${k}')"><b>${c.emoji} ${c.label} · x${c.mult} · ${c.minutes} мин</b><span>${c.cost?fmt(c.cost)+" монет":"владелец"}</span></button>`}).join("")}</div></main>`;
-}
-function timeLeft(t){let s=Math.max(0,Math.floor((t-Date.now())/1000));return `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`}
 
-function removeOwnerBoosts(){
-  const all=players(); let count=0;
-  const now=Date.now();
-  for(const p of all){
-    if(Number(p.boostExpiresAt||0)>now && Number(p.boostMultiplier||1)>1){
-      p.boostMultiplier=1;
-      p.boostExpiresAt=0;
-      p.ownerBoost=false;
-      save(p);
-      if(state.user && full(state.user)===full(p)){
-        state.user={...p};
-      }
-      count++;
-    }else if(p.ownerBoost){
-      p.ownerBoost=false;
-      p.boostMultiplier=1;
-      p.boostExpiresAt=0;
-      save(p);
-      if(state.user && full(state.user)===full(p)) state.user={...p};
-    }
-  }
-  notice(`⚡ Убрано активных бустов: ${count}.`);
-  ownerRefresh();
-  render();
+function chooseAnimal(id) {
+const updated = { ...user, animal: id };
+setUser(updated);
+savePlayer(updated);
+setScreen('game');
 }
-function removePlayerCoins(n){
-  const p=get(n);
-  if(!p)return;
-  p.coins=0;
-  save(p);
-  notice(`🪙 Монеты игрока ${n} обнулены.`);
-  ownerRefresh();render();
+
+function throttledSave(updated) {
+const now = Date.now();
+const elapsed = now - lastWriteRef.current;
+if (pendingWriteRef.current) {
+clearTimeout(pendingWriteRef.current);
+pendingWriteRef.current = null;
 }
-function blockPlayer(n){
-  const p=get(n);
-  if(!p)return;
-  p.blocked=true;
-  save(p);
-  if(state.user && full(state.user)===n){
-    state.user=null;
-    state.screen="auth";
-  }
-  notice(`🚫 Игрок ${n} заблокирован.`);
-  ownerRefresh();render();
+if (elapsed > 1000) {
+lastWriteRef.current = now;
+savePlayer(updated);
+} else {
+pendingWriteRef.current = setTimeout(() => {
+lastWriteRef.current = Date.now();
+savePlayer(updated);
+pendingWriteRef.current = null;
+}, 1000 - elapsed);
 }
-function unblockPlayer(n){
-  const p=get(n);
-  if(!p)return;
-  p.blocked=false;
-  save(p);
-  notice(`✅ Игрок ${n} разблокирован.`);
-  ownerRefresh();render();
 }
-function ownerView(){
- const list=state.players;
- return `<main class="owner-page"><div class="owner-wrap"><div class="owner-head"><b>👑 ПАНЕЛЬ ВЛАДЕЛЬЦА</b><button class="back darkback" onclick="state.screen='game';render()">К игре</button></div>
- <section class="owner-box"><div><b>${state.blocked?"🔒 Игра заблокирована":"🔓 Игра открыта"}</b></div><button class="${state.blocked?"green":"red"}" onclick="state.blocked=!state.blocked;saveGlobal();render()">${state.blocked?"РАЗБЛОКИРОВАТЬ":"ЗАБЛОКИРОВАТЬ"}</button></section>
- <section class="owner-box"><b>📢 Объявление для всех</b><div class="row"><input id="broadcast" placeholder="Например: скоро ивент"><button class="gold-btn" onclick="sendBroadcast()">OK</button></div><button class="remove-announcement" onclick="state.broadcast='';saveGlobal();render()">УБРАТЬ ОБЪЯВЛЕНИЕ</button></section>
- <section class="owner-box"><button class="owner-toggle" onclick="state.abuseOpen=!state.abuseOpen;state.abuseTarget=false;render()">⚡ Выдать буст ${state.abuseOpen?"▲":"▼"}</button>
- ${state.abuseOpen?`<div class="stack"><div class="row"><input id="abuse-mult" type="number" value="2" placeholder="Множитель"><input id="abuse-min" type="number" value="10" placeholder="Минут"></div>
- <button class="red wide" onclick="grantAll()">⚡ ВЫДАТЬ БУСТ ВСЕМ</button>
- <button class="orange wide" onclick="state.abuseTarget=!state.abuseTarget;render()">👤 ${state.abuseTarget?"СКРЫТЬ ВЫБОР ИГРОКА":"ВЫДАТЬ БУСТ ОДНОМУ ИГРОКУ"}</button>
- ${state.abuseTarget?`<div class="mini-list">${list.length?list.map(p=>`<div class="player-admin-row"><span>${online(p)?"🟢":"⚪"} ${esc(full(p))}</span><div class="admin-actions"><button onclick="grantOne('${esc(full(p)).replace(/'/g,"\\'")}')">⚡ Буст</button><button onclick="removePlayerCoins('${esc(full(p)).replace(/'/g,"\\'")}')">🪙 0 монет</button>${p.blocked?`<button onclick="unblockPlayer('${esc(full(p)).replace(/'/g,"\\'")}')">✅ Разблокировать</button>`:`<button class="danger" onclick="blockPlayer('${esc(full(p)).replace(/'/g,"\\'")}')">🚫 Заблокировать</button>`}</div></div>`).join(""):`<div class="empty">Нет игроков.</div>`}</div>`:""}
- <button class="gray wide" onclick="removeOwnerBoosts()">🧹 УБРАТЬ ВСЕ БУСТЫ ВЛАДЕЛЬЦА</button></div>`:""}</section>
- <div class="players-head"><b>👥 Игроки (${list.length})</b><button onclick="ownerRefresh();render()">↻</button></div>
- <div class="owner-list">${list.length?list.map(ownerCard).join(""):`<div class="empty darkempty">В зоопарке пока никого — поделись ссылкой с друзьями.</div>`}</div>
- </div></main>`;
+
+function handleAnimalClick() {
+if (!user) return;
+if (gameState.blocked && !user.isOwner) return;
+if (isPersonallyBlocked(user)) return;
+lastClickRef.current = Date.now();
+const rawMult = activeMultiplier(user, gameState.activeEvent);
+const gain = Math.max(1, Math.round(rawMult));
+const updated = { ...user, coins: user.coins + gain, totalEarned: (user.totalEarned || 0) + gain };
+setUser(updated);
+throttledSave(updated);
+
+const id = Math.random().toString(36).slice(2);
+setFloaters(f => [...f, { id, text: +${gain}` }]);
+setTimeout(() => setFloaters(f => f.filter(t => t.id !== id)), 800);
+
+const rid = id + 'r';
+setRipples(r => [...r, { id: rid }]);
+setTimeout(() => setRipples(r => r.filter(t => t.id !== rid)), 500);
+
+setIsPunching(true);
+setTimeout(() => setIsPunching(false), 120);
 }
-function ownerCard(p){
- const n=full(p),tmp=p.boostExpiresAt>Date.now(),bt=p.blockedUntil>Date.now();
- return `<div class="owner-card"><div class="player-head"><b>${online(p)?"🟢":"⚪"} ${animal(p.animal).emoji} ${esc(n)}</b><strong>🪙 ${fmt(p.coins)}</strong></div>
- <div class="badges">${p.rebirths?`<span class="purple">♻️ x${fmtMult(rebirthMult(p.rebirths))} (${p.rebirths})</span>`:""}${p.permanentTier?`<span class="gold">x${perm(p.permanentTier)} постоянный</span>`:""}${tmp?`<span class="pink">x${p.boostMultiplier} временный <button onclick="removeBoost('${esc(n).replace(/'/g,"\\'")}')">снять</button></span>`:""}${p.blockedForever?`<span class="pink">🔒 навсегда</span>`:""}${bt?`<span class="orange">🔒 ещё ~${Math.ceil((p.blockedUntil-Date.now())/60000)} мин</span>`:""}</div>
- <div class="row compact"><input id="amt-${esc(n)}" type="number" value="50"><button class="green" onclick="adjust('${esc(n).replace(/'/g,"\\'")}',Number(document.getElementById('amt-${esc(n)}').value)||50)">＋</button><button class="red" onclick="adjust('${esc(n).replace(/'/g,"\\'")}',-(Number(document.getElementById('amt-${esc(n)}').value)||50))">−</button><button onclick="zero('${esc(n).replace(/'/g,"\\'")}' )">0</button><button class="kick" onclick="kick('${esc(n).replace(/'/g,"\\'")}')">Кик</button></div>
- <div class="row compact"><input data-block="${esc(n)}" type="number" value="60" max="60"><button class="orange" onclick="blockTemp('${esc(n).replace(/'/g,"\\'")}')">Блок</button><button class="red darkred" onclick="blockForever('${esc(n).replace(/'/g,"\\'")}')">Навсегда</button>${p.blockedForever||bt?`<button class="green push" onclick="unblock('${esc(n).replace(/'/g,"\\'")}')">Разблок</button>`:""}</div>
- <div class="row compact"><input data-x0="${esc(n)}" type="number" min="1" max="60" value="60"><button class="red darkred" onclick="setX0('${esc(n).replace(/'/g,"\'")}')">X0 на время</button>${p.ownerX0Until>Date.now()?`<button class="green push" onclick="clearX0('${esc(n).replace(/'/g,"\'")}')">Снять X0</button>`:""}</div>
- ${p.comment?`<div class="comment">💬 ${esc(p.comment)}<div class="row"><input data-reply="${esc(n)}" maxlength="200" placeholder="Ответить…"><button class="gold-btn" onclick="sendReply('${esc(n).replace(/'/g,"\\'")}')">ОК</button></div>${p.ownerReply?`<small>Ты ответил: ${esc(p.ownerReply)}</small>`:""}</div>`:""}</div>`;
+
+function buyTempBoost(idx) {
+if (!user) return;
+const tier = TEMP_BOOSTS[idx];
+const cost = tempBoostCost(idx, user.totalEarned);
+if (user.coins < cost) return;
+if (user.boostExpiresAt && user.boostExpiresAt > Date.now()) return;
+const updated = { ...user, coins: user.coins - cost, boostMultiplier: tier.mult, boostExpiresAt: Date.now() + tier.minutes * 60000 };
+setUser(updated);
+lastWriteRef.current = Date.now();
+savePlayer(updated);
 }
-function gameView(){
- const u=state.user,am=animal(u.animal),blocked=(state.blocked&&!u.isOwner)||personalBlocked(u);
- const ev=state.event&&state.event.expiresAt>Date.now()?state.event:null,temp=u.boostExpiresAt>Date.now();
- const remain=temp?timeLeft(u.boostExpiresAt):"", total=mult(u);
- return `<main class="page game-page">${topbar()}
- <div class="coin-pill">🪙 <b>${fmt(u.coins)}</b></div>
- ${state.broadcast?`<div class="broadcast">📢 ${esc(state.broadcast)}</div>`:""}
- ${ev?`<div class="event-pill ${ev.type==="disco"?"disco":""}">${EVENTS[ev.type].emoji} ${EVENTS[ev.type].label} x${ev.mult}</div>`:""}
- ${state.toast?`<div class="toast ${state.toast.type==="reply"?"reply":""}">${state.toast.type==="reply"?"💬 Владелец ответил: ":"📢 "}${esc(state.toast.msg)}</div>`:""}
- ${blocked?`<div class="blocked"><div>🔒</div><b>${personalBlocked(u)?"ТЫ ЗАБЛОКИРОВАН":"ИГРА ЗАБЛОКИРОВАНА"}</b><p>${personalBlocked(u)?(u.blockedForever?"Владелец заблокировал тебя навсегда":"Осталось "+timeLeft(u.blockedUntil)):"Владелец скоро откроет её снова"}</p></div>`:
- `<div class="animal-zone"><button class="animal-main ${state.punch?"punch":""}" onclick="clickAnimal()"><span>${am.emoji}</span></button>${state.floaters.map(f=>`<div class="floater">${f}</div>`).join("")}</div>
- <button class="change" onclick="state.screen='animal';render()">сменить животное</button>
- ${total>1?`<div class="total-mult">⚡ x${fmtMult(total)} ${temp?"— ещё "+remain:""}</div>`:""}
- <section class="shop"><label>ВРЕМЕННЫЕ БУСТЫ ${u.totalEarned>=1000?`<em>цены выросли</em>`:""}</label>${TEMP_BOOSTS.map((b,i)=>{const c=tempCost(i,u.totalEarned),can=Number(u.coins)>=Number(c)&&!temp;return `<button class="stamp shop-btn ${can?"affordable":"unaffordable"}" ${can?"":"disabled"} onclick="buyTemp(${i})"><b>⚡ x${b.mult} на ${b.minutes} мин</b><span>${fmt(c)} монет</span></button>`}).join("")}</section>
- <section class="shop"><label>ПОСТОЯННЫЙ БУСТ</label><button class="stamp shop-btn perm ${Number(u.coins)>=Number(permCost(u.permanentTier||0))?"affordable":"unaffordable"}" ${Number(u.coins)>=Number(permCost(u.permanentTier||0))?"":"disabled"} onclick="buyPerm()"><b>x${nextPerm(u.permanentTier||0)} НАВСЕГДА</b><span>${fmt(permCost(u.permanentTier||0))} монет</span></button>${u.permanentTier?`<small>сейчас: x${perm(u.permanentTier)}</small>`:""}</section>
- <section class="shop"><label>ПЕРЕРОЖДЕНИЕ</label>${u.rebirths>=100?`<div class="maxbox">Достигнут максимум — 100 перерождений</div>`:`<button type="button" id="rebirth-button" class="stamp shop-btn ${Number(u.coins)>=Number(rebirthCost(u.rebirths+1))?"affordable":"unaffordable"}" ${Number(u.coins)>=Number(rebirthCost(u.rebirths+1))?"":"disabled"} onclick="rebirth()"><b>♻️ Переродиться → x${fmtMult(rebirthMult(u.rebirths+1))}</b><span>${fmt(rebirthCost(u.rebirths+1))} монет</span></button>`}${u.rebirths?`<small>сейчас: x${fmtMult(rebirthMult(u.rebirths))} (${u.rebirths}/100)</small>`:""}<small>обнуляет монеты, буст и постоянный буст сохраняются</small></section>`}
- </main>`;
+
+function buyPermanentBoost() {
+if (!user) return;
+const tier = user.permanentTier || 0;
+const cost = nextPermCost(tier);
+if (user.coins < cost) return;
+const updated = { ...user, coins: user.coins - cost, permanentTier: tier + 1 };
+setUser(updated);
+lastWriteRef.current = Date.now();
+savePlayer(updated);
 }
-function render(){
-  const app=$("#app");
-  if(!state.user||state.screen==="auth")app.innerHTML=authView();
-  else if(state.screen==="animal")app.innerHTML=animalView();
-  else if(state.screen==="help")app.innerHTML=helpView();
-  else if(state.screen==="gift")app.innerHTML=giftView();
-  else if(state.screen==="events")app.innerHTML=eventsView();
-  else if(state.screen==="owner")app.innerHTML=ownerView();
-  else app.innerHTML=gameView();
+
+function handleRebirth() {
+if (!user) return;
+const nextNum = (user.rebirths || 0) + 1;
+if (nextNum > REBIRTH_MAX) return;
+const cost = rebirthCostFor(nextNum);
+if (user.coins < cost) return;
+const newMult = rebirthMultiplier(nextNum);
+const ok = window.confirm(Переродиться? Все твои монеты (${fmt(user.coins)}) обнулятся. Новый множитель перерождений: x${fmtMult(newMult)}. Постоянный буст сохранится.);
+if (!ok) return;
+const updated = { ...user, coins: 0, rebirths: nextNum };
+setUser(updated);
+lastWriteRef.current = Date.now();
+savePlayer(updated);
 }
-loadGlobal();render();setInterval(tick,1000);
-</script>
-<script>
-window.addEventListener("error",function(e){
-  console.error(e.error||e.message);
-  const app=document.getElementById("app");
-  if(app && !app.innerHTML.trim()){
-    app.innerHTML='<main style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;font-family:Arial;background:#fffbeb"><div style="max-width:360px;background:white;border:2px solid #1c1917;border-radius:12px;padding:20px;text-align:center"><h2 style="color:#14532d">Зоокликер</h2><p>Произошла ошибка загрузки. Попробуй обновить страницу.</p><button onclick="location.reload()" style="padding:10px 16px">Обновить</button></div></main>';
-  }
+
+async function startEvent(type) {
+if (!user) return;
+const cfg = EVENTS[type];
+if (!cfg) return;
+if (cfg.ownerOnly && !user.isOwner) return;
+if (gameState.activeEvent && gameState.activeEvent.expiresAt > Date.now()) return;
+if (cfg.cost > 0) {
+if (user.coins < cfg.cost) return;
+const updatedUser = { ...user, coins: user.coins - cfg.cost };
+setUser(updatedUser);
+lastWriteRef.current = Date.now();
+savePlayer(updatedUser);
+}
+const newGs = { ...gameState, activeEvent: { type, mult: cfg.mult, expiresAt: Date.now() + cfg.minutes * 60000 } };
+setGameState(newGs);
+await saveGameStateStorage(newGs);
+}
+
+useEffect(() => {
+if (!user) return;
+let cancelled = false;
+const iv = setInterval(async () => {
+const cur = userRef.current;
+if (!cur) return;
+const curFullName = fullNameOf(cur);
+const gs = await getGameStateStorage();
+if (cancelled) return;
+setGameState(gs);
+if (gs.broadcastId !== seenBroadcastRef.current && gs.broadcastMessage) {
+seenBroadcastRef.current = gs.broadcastId;
+setBroadcastToast(gs.broadcastMessage);
+setTimeout(() => setBroadcastToast(null), 6000);
+}
+const fresh = await getPlayer(curFullName);
+if (cancelled || !fresh) return;
+if (fresh.kicked) {
+await savePlayer({ ...fresh, kicked: false });
+setUser(null);
+setScreen('auth');
+setKickedNotice(true);
+return;
+}
+if (Date.now() - lastHeartbeatRef.current > HEARTBEAT_MS) {
+lastHeartbeatRef.current = Date.now();
+savePlayer({ ...cur, lastSeen: Date.now() });
+}
+if (fresh.ownerReplyId && fresh.ownerReplyId !== seenReplyRef.current && fresh.ownerReply) {
+seenReplyRef.current = fresh.ownerReplyId;
+setReplyToast(fresh.ownerReply);
+setTimeout(() => setReplyToast(null), 8000);
+}
+const recentlyClicked = Date.now() - lastClickRef.current < 1200;
+setUser(u => {
+if (!u) return u;
+return {
+...u,
+coins: recentlyClicked ? u.coins : fresh.coins,
+totalEarned: fresh.totalEarned,
+boostMultiplier: fresh.boostMultiplier,
+boostExpiresAt: fresh.boostExpiresAt,
+permanentTier: fresh.permanentTier,
+rebirths: fresh.rebirths,
+isOwner: fresh.isOwner,
+animal: fresh.animal || u.animal,
+blockedForever: fresh.blockedForever,
+blockedUntil: fresh.blockedUntil,
+ownerReply: fresh.ownerReply,
+ownerReplyId: fresh.ownerReplyId,
+};
 });
-</script>
-</body>
-</html>
+if (cur.isOwner) {
+const list = await getPlayerList();
+const loaded = await Promise.all(list.map(n => getPlayer(n)));
+if (!cancelled) setPlayers(loaded.filter(Boolean));
+}
+}, 3000);
+return () => { cancelled = true; clearInterval(iv); };
+}, [!!user]);
+
+async function refreshOwnerPanel() {
+const list = await getPlayerList();
+const loaded = await Promise.all(list.map(n => getPlayer(n)));
+setPlayers(loaded.filter(Boolean));
+const gs = await getGameStateStorage();
+setGameState(gs);
+}
+
+function enterOwnerPanel() {
+setScreen('owner');
+refreshOwnerPanel();
+}
+
+async function adjustCoins(fullName, delta) {
+const p = await getPlayer(fullName);
+if (!p) return;
+const updated = { ...p, coins: Math.max(0, p.coins + delta) };
+await savePlayer(updated);
+setPlayers(ps => ps.map(pl => fullNameOf(pl) === fullName ? updated : pl));
+}
+
+async function zeroCoins(fullName) {
+const p = await getPlayer(fullName);
+if (!p) return;
+const updated = { ...p, coins: 0 };
+await savePlayer(updated);
+setPlayers(ps => ps.map(pl => fullNameOf(pl) === fullName ? updated : pl));
+}
+
+async function removeBoost(fullName) {
+const p = await getPlayer(fullName);
+if (!p) return;
+const updated = { ...p, boostMultiplier: 1, boostExpiresAt: null };
+await savePlayer(updated);
+setPlayers(ps => ps.map(pl => fullNameOf(pl) === fullName ? updated : pl));
+}
+
+async function kickPlayer(fullName) {
+const p = await getPlayer(fullName);
+if (!p) return;
+const updated = { ...p, kicked: true };
+await savePlayer(updated);
+setPlayers(ps => ps.map(pl => fullNameOf(pl) === fullName ? updated : pl));
+}
+
+async function blockTemp(fullName) {
+const minutes = blockMinuteInputs[fullName] ?? 10;
+if (!minutes || minutes <= 0) return;
+const p = await getPlayer(fullName);
+if (!p) return;
+const updated = { ...p, blockedForever: false, blockedUntil: Date.now() + minutes * 60000 };
+await savePlayer(updated);
+setPlayers(ps => ps.map(pl => fullNameOf(pl) === fullName ? updated : pl));
+}
+
+async function blockForever(fullName) {
+const p = await getPlayer(fullName);
+if (!p) return;
+const updated = { ...p, blockedForever: true, blockedUntil: null };
+await savePlayer(updated);
+setPlayers(ps => ps.map(pl => fullNameOf(pl) === fullName ? updated : pl));
+}
+
+async function unblockPlayer(fullName) {
+const p = await getPlayer(fullName);
+if (!p) return;
+const updated = { ...p, blockedForever: false, blockedUntil: null };
+await savePlayer(updated);
+setPlayers(ps => ps.map(pl => fullNameOf(pl) === fullName ? updated : pl));
+}
+
+async function toggleBlock() {
+const updated = { ...gameState, blocked: !gameState.blocked };
+setGameState(updated);
+await saveGameStateStorage(updated);
+}
+
+async function sendBroadcast() {
+const msg = broadcastInput.trim();
+if (!msg) return;
+const updated = { ...gameState, broadcastMessage: msg, broadcastId: (gameState.broadcastId || 0) + 1 };
+setGameState(updated);
+seenBroadcastRef.current = updated.broadcastId;
+await saveGameStateStorage(updated);
+setBroadcastInput('');
+}
+
+async function sendReply(fullName) {
+const msg = (replyInputs[fullName] || '').trim();
+if (!msg) return;
+const p = await getPlayer(fullName);
+if (!p) return;
+const updated = { ...p, ownerReply: msg.slice(0, 200), ownerReplyId: (p.ownerReplyId || 0) + 1 };
+await savePlayer(updated);
+setPlayers(ps => ps.map(pl => fullNameOf(pl) === fullName ? updated : pl));
+setReplyInputs(r => ({ ...r, [fullName]: '' }));
+}
+
+async function grantBoostToAll(mult, minutes) {
+const names = await getPlayerList();
+const expiresAt = Date.now() + minutes * 60000;
+for (const name of names) {
+const p = await getPlayer(name);
+if (p) await savePlayer({ ...p, boostMultiplier: mult, boostExpiresAt: expiresAt });
+}
+refreshOwnerPanel();
+}
+async function grantBoostToOne(fullName, mult, minutes) {
+const p = await getPlayer(fullName);
+if (!p) return;
+const updated = { ...p, boostMultiplier: mult, boostExpiresAt: Date.now() + minutes * 60000 };
+await savePlayer(updated);
+refreshOwnerPanel();
+}
+function handleGrantAll() {
+const mult = Number(abuseMult);
+const minutes = Number(abuseMinutes) || 10;
+if (!mult || mult <= 0) return;
+grantBoostToAll(mult, minutes);
+}
+function handleGrantOne(fullName) {
+const mult = Number(abuseMult);
+const minutes = Number(abuseMinutes) || 10;
+if (!mult || mult <= 0) return;
+grantBoostToOne(fullName, mult, minutes);
+}
+
+async function enterGiftScreen() {
+setScreen('gift');
+setGiftStatus('');
+setGiftRecipient(null);
+setGiftAmount('');
+const names = await getPlayerList();
+const loaded = await Promise.all(names.map(n => getPlayer(n)));
+setGiftPlayers(loaded.filter(p => p && fullNameOf(p) !== fullNameOf(user)));
+}
+
+async function confirmGift() {
+const amount = Math.floor(Number(giftAmount));
+if (!giftRecipient || !amount || amount <= 0) { setGiftStatus('Выбери получателя и сумму.'); return; }
+if (amount > user.coins) { setGiftStatus('Недостаточно монет.'); return; }
+const recipient = await getPlayer(giftRecipient);
+if (!recipient) { setGiftStatus('Игрок не найден.'); return; }
+const updatedRecipient = { ...recipient, coins: recipient.coins + amount };
+await savePlayer(updatedRecipient);
+const updatedSelf = { ...user, coins: user.coins - amount };
+setUser(updatedSelf);
+lastWriteRef.current = Date.now();
+savePlayer(updatedSelf);
+setGiftStatus(Подарено ${fmt(amount)} монет игроку ${giftRecipient}!);
+setGiftAmount('');
+setGiftRecipient(null);
+}
+
+const animalMeta = user ? ANIMALS.find(a => a.id === user.animal) : null;
+const permMult = user ? permMultForTier(user.permanentTier || 0) : 1;
+const tempActive = user && user.boostExpiresAt && user.boostExpiresAt > Date.now();
+const totalMult = user ? activeMultiplier(user, gameState.activeEvent) : 1;
+const tempRemaining = tempActive ? Math.max(0, user.boostExpiresAt - Date.now()) : 0;
+const mm = Math.floor(tempRemaining / 60000);
+const ss = Math.floor((tempRemaining % 60000) / 1000);
+const blockRemaining = user && user.blockedUntil ? Math.max(0, user.blockedUntil - Date.now()) : 0;
+const bmm = Math.floor(blockRemaining / 60000);
+const bss = Math.floor((blockRemaining % 60000) / 1000);
+
+if (screen === 'auth' || !user) {
+return (
+<div className="min-h-screen w-full paper-bg flex items-center justify-center p-4">
+<style>{GLOBAL_STYLE}
+.level-card{width:100%;max-width:380px;background:#fff;border:2px solid #1c1917;border-radius:10px;padding:10px 12px;margin:4px 0 10px}
+.level-card b{color:#14532d}.level-card small{display:block;color:#78716c;margin-top:3px}.levelbar{height:8px;background:#e7e5e4;border-radius:99px;overflow:hidden;margin-top:7px}.levelbar i{display:block;height:100%;background:#d97706}
+.feature-btn{width:100%;padding:10px 12px;background:#fff;border:2px solid #1c1917;border-radius:8px;text-align:left;margin-bottom:8px}.feature-btn b{font-family:'Russo One',sans-serif}.feature-btn small{display:block;color:#78716c;margin-top:3px}
+.ach-grid{display:grid;gap:8px}.ach{border:2px solid #d6d3d1;border-radius:8px;padding:9px;background:#fff}.ach.done{border-color:#15803d;background:#f0fdf4}.ach b{display:block}.ach small{color:#78716c}
+</style>
+<div className="w-full max-w-sm">
+<div className="text-center mb-6">
+<div className="text-6xl mb-2">🎪</div>
+<h1 className="font-display text-4xl text-green-900 tracking-wide">ЗООКЛИКЕР</h1>
+<p className="font-body text-stone-600 text-sm mt-1">жми на животное — получай монеты</p>
+</div>
+<div className="bg-white rounded-xl p-6 space-y-3 border-2 border-stone-900">
+{kickedNotice && (
+<div className="font-body bg-red-50 text-red-700 text-sm rounded-md px-3 py-2 text-center border border-red-200">
+Владелец тебя кикнул. Можешь войти снова.
+</div>
+)}
+<div className="flex gap-2">
+<input
+className="font-body flex-1 rounded-md border-2 border-stone-300 px-3 py-3 text-stone-900 focus:outline-none focus:border-green-800"
+placeholder="Имя"
+value={firstName}
+onChange={e => setFirstName(e.target.value)}
+onKeyDown={e => { if (e.key === 'Enter') handleAuth(); }}
+maxLength={20}
+/>
+<input
+className="font-body flex-1 rounded-md border-2 border-stone-300 px-3 py-3 text-stone-900 focus:outline-none focus:border-green-800"
+placeholder="Фамилия"
+value={lastName}
+onChange={e => setLastName(e.target.value)}
+onKeyDown={e => { if (e.key === 'Enter') handleAuth(); }}
+maxLength={20}
+/>
+</div>
+<input
+className="font-body w-full rounded-md border-2 border-stone-300 px-4 py-3 text-stone-900 focus:outline-none focus:border-green-800"
+placeholder="Пароль"
+type="password"
+value={password}
+onChange={e => setPassword(e.target.value)}
+onKeyDown={e => { if (e.key === 'Enter') handleAuth(); }}
+/>
+<input
+className="font-body w-full rounded-md border-2 border-stone-300 px-4 py-3 text-stone-900 focus:outline-none focus:border-green-800"
+placeholder="Код владельца (не обязательно)"
+value={ownerCodeInput}
+onChange={e => setOwnerCodeInput(e.target.value)}
+onKeyDown={e => { if (e.key === 'Enter') handleAuth(); }}
+/>
+<textarea
+className="font-body w-full rounded-md border-2 border-stone-300 px-4 py-3 text-stone-900 focus:outline-none focus:border-green-800 resize-none"
+placeholder="Комментарий владельцу (не обязательно)"
+value={commentInput}
+onChange={e => setCommentInput(e.target.value)}
+maxLength={200}
+rows={2}
+/>
+{authError && <div className="font-body text-red-700 text-sm text-center">{authError}</div>}
+<button
+onClick={handleAuth}
+disabled={authLoading}
+style={{ '--sc': GREEN }}
+className="stamp-btn font-display w-full bg-amber-600 text-white tracking-wide rounded-md py-3 border-2 border-stone-900 disabled:opacity-50"
+>
+{authLoading ? 'СЕКУНДУ…' : 'ВОЙТИ'}
+</button>
+<p className="font-body text-xs text-stone-500 text-center">
+Новые имя и фамилия создадут аккаунт. Существующие — нужен пароль.
+</p>
+</div>
+</div>
+</div>
+);
+}
+
+if (screen === 'animal') {
+return (
+<div className="min-h-screen w-full paper-bg p-4 flex flex-col items-center justify-center">
+<style>{GLOBAL_STYLE}</style>
+<h2 className="font-display text-2xl text-green-900 mb-1 tracking-wide">ВЫБЕРИ ЖИВОТНОЕ</h2>
+<p className="font-body text-stone-500 text-sm mb-6">потом можно поменять</p>
+<div className="grid grid-cols-3 gap-3 max-w-sm w-full">
+{ANIMALS.map(a => (
+<button
+key={a.id}
+onClick={() => chooseAnimal(a.id)}
+className="bg-white rounded-full aspect-square border-4 border-green-900 hover:border-amber-600 active:scale-95 transition p-2 flex flex-col items-center justify-center gap-0.5"
+>
+<span className="text-4xl">{a.emoji}</span>
+<span className="font-body text-xs text-stone-600 font-bold">{a.name}</span>
+</button>
+))}
+</div>
+</div>
+);
+}
+
+if (screen === 'help') {
+return (
+<div className="min-h-screen w-full paper-bg p-4">
+<style>{GLOBAL_STYLE}</style>
+<button onClick={() => setScreen('game')} className="font-body text-stone-600 text-sm underline mb-4">← Назад</button>
+<h2 className="font-display text-2xl text-green-900 mb-4 tracking-wide text-center">❓ КАК ИГРАТЬ</h2>
+<div className="max-w-sm mx-auto bg-white border-2 border-stone-900 rounded-xl p-5 space-y-3 font-body text-sm text-stone-700">
+<p>🐾 Жми на животное — за каждый тап получаешь монеты.</p>
+<p>⚡ Временные бусты ускоряют заработок на время. После 1000 накопленных монет они дорожают.</p>
+<p>💠 Постоянный буст навсегда удваивает множитель — с каждой покупкой дороже вдвое.</p>
+<p>♻️ Перерождение обнуляет монеты, зато навсегда усиливает множитель. До 100 перерождений.</p>
+<p>🎉 События дают буст сразу всем игрокам на время.</p>
+<p>🎁 Монетами можно делиться с другими игроками.</p>
+<p>👑 У игры есть владелец — он может как помогать, так и мешать. Это часть веселья!</p>
+</div>
+</div>
+);
+}
+
+if (screen === 'gift') {
+return (
+<div className="min-h-screen w-full paper-bg p-4">
+<style>{GLOBAL_STYLE}</style>
+<button onClick={() => setScreen('game')} className="font-body text-stone-600 text-sm underline mb-4">← Назад</button>
+<h2 className="font-display text-2xl text-green-900 mb-1 tracking-wide text-center">🎁 ПОДАРИТЬ МОНЕТЫ</h2>
+<p className="font-body text-stone-500 text-sm mb-4 text-center">у тебя {fmt(user.coins)} монет</p>
+<div className="max-w-sm mx-auto">
+<input
+type="number"
+placeholder="Сколько подарить"
+value={giftAmount}
+onChange={e => setGiftAmount(e.target.value)}
+className="font-body w-full rounded-md border-2 border-stone-300 px-4 py-3 text-stone-900 focus:outline-none focus:border-green-800 mb-3"
+/>
+{giftStatus && <div className="font-body text-sm text-green-800 text-center mb-3">{giftStatus}</div>}
+<div className="space-y-2 mb-4">
+{giftPlayers.length === 0 && <div className="font-body text-stone-500 text-sm text-center">Пока больше никого нет в зоопарке.</div>}
+{giftPlayers.map(p => {
+const pName = fullNameOf(p);
+const selected = giftRecipient === pName;
+return (
+<button
+key={pName}
+onClick={() => setGiftRecipient(pName)}
+className={font-body w-full rounded-md border-2 px-4 py-2.5 flex items-center gap-2 ${selected ? 'border-green-900 bg-green-50' : 'border-stone-300 bg-white'}`}
+>
+<span className="text-xl">{ANIMALS.find(a => a.id === p.animal)?.emoji || '❓'}</span>
+<span className="text-stone-800 text-sm font-bold flex-1 text-left">{pName}</span>
+{isOnline(p) && <span className="w-2 h-2 rounded-full bg-green-500 inline-block" />}
+</button>
+);
+})}
+</div>
+<button
+onClick={confirmGift}
+disabled={!giftRecipient || !giftAmount || Number(giftAmount) <= 0 || Number(giftAmount) > user.coins}
+style={{ '--sc': GREEN }}
+className="stamp-btn font-display w-full bg-amber-600 text-white tracking-wide rounded-md py-3 border-2 border-stone-900 disabled:opacity-50"
+>
+ПОДАРИТЬ
+</button>
+</div>
+</div>
+);
+}
+
+if (screen === 'events') {
+const active = gameState.activeEvent && gameState.activeEvent.expiresAt > Date.now() ? gameState.activeEvent : null;
+const evRemaining = active ? Math.max(0, active.expiresAt - Date.now()) : 0;
+const evMM = Math.floor(evRemaining / 60000);
+const evSS = Math.floor((evRemaining % 60000) / 1000);
+return (
+<div className="min-h-screen w-full paper-bg p-4">
+<style>{GLOBAL_STYLE}</style>
+<button onClick={() => setScreen('game')} className="font-body text-stone-600 text-sm underline mb-4">← Назад</button>
+<h2 className="font-display text-2xl text-green-900 mb-4 tracking-wide text-center">🎉 СОБЫТИЯ</h2>
+
+{active && (
+<div className="pulse-glow bg-white border-2 border-amber-600 rounded-xl p-4 mb-4 text-center max-w-sm mx-auto">
+<div className="font-display text-lg text-stone-800">{EVENTS[active.type].emoji} {EVENTS[active.type].label}</div>
+<div className="font-body text-sm text-stone-500">x{active.mult} — ещё {evMM}:{evSS.toString().padStart(2, '0')}</div>
+</div>
+)}
+
+<div className="max-w-sm mx-auto space-y-3">
+{Object.entries(EVENTS).filter(([key, cfg]) => !cfg.ownerOnly || user.isOwner).map(([key, cfg]) => (
+<button
+key={key}
+onClick={() => startEvent(key)}
+disabled={!!active || (cfg.cost > 0 && user.coins < cfg.cost)}
+style={{ '--sc': GREEN }}
+className="stamp-btn w-full bg-white disabled:opacity-40 rounded-md px-4 py-3 flex items-center justify-between border-2 border-stone-900"
+>
+<span className="font-display text-stone-800 text-sm">{cfg.emoji} {cfg.label} · x{cfg.mult} · {cfg.minutes} мин</span>
+<span className="font-body text-xs text-stone-500">{cfg.cost > 0 ? ``${fmt(cfg.cost)} монет` : 'владелец'}</span>
+</button>
+))}
+</div>
+</div>
+);
+}
+
+if (screen === 'owner') {
+const list = players.filter(p => fullNameOf(p) !== fullNameOf(user));
+return (
+<div className="min-h-screen w-full bg-stone-900 p-4">
+<style>{GLOBAL_STYLE}</style>
+<div className="max-w-md mx-auto">
+<div className="flex items-center justify-between mb-4">
+<div className="flex items-center gap-2 text-amber-500 font-display text-xl tracking-wide">
+<Crown size={22} /> ПАНЕЛЬ ВЛАДЕЛЬЦА
+</div>
+<button onClick={() => setScreen('game')} className="font-body text-stone-400 text-sm underline">
+К игре
+</button>
+</div>
+
+<div className="bg-stone-800 rounded-lg p-4 mb-4 border border-stone-700">
+<div className="flex items-center justify-between">
+<div className="font-body flex items-center gap-2 text-white font-bold text-sm">
+{gameState.blocked ? <Lock size={16} className="text-red-500" /> : <Unlock size={16} className="text-green-500" />}
+{gameState.blocked ? 'Игра заблокирована' : 'Игра открыта'}
+</div>
+<button
+onClick={toggleBlock}
+className={font-body px-4 py-2 rounded-md font-bold text-xs text-white ${gameState.blocked ? 'bg-green-700' : 'bg-red-700'}`}
+>
+{gameState.blocked ? 'РАЗБЛОКИРОВАТЬ' : 'ЗАБЛОКИРОВАТЬ'}
+</button>
+</div>
+</div>
+
+<div className="bg-stone-800 rounded-lg p-4 mb-4 border border-stone-700">
+<div className="font-body text-white font-bold text-sm mb-2 flex items-center gap-2">
+<Megaphone size={16} /> Объявление для всех
+</div>
+<div className="flex gap-2">
+<input
+className="font-body flex-1 rounded-md bg-stone-700 text-white px-3 py-2 text-sm focus:outline-none"
+placeholder="Например: скоро ивент"
+value={broadcastInput}
+onChange={e => setBroadcastInput(e.target.value)}
+onKeyDown={e => { if (e.key === 'Enter') sendBroadcast(); }}
+/>
+<button onClick={sendBroadcast} className="font-body bg-amber-600 text-white rounded-md px-4 font-bold text-sm">
+OK
+</button>
+</div>
+</div>
+
+<div className="bg-stone-800 rounded-lg p-4 mb-4 border border-stone-700">
+<button onClick={() => setAbuseOpen(o => !o)} className="font-body text-white font-bold text-sm flex items-center gap-2 w-full">
+<Zap size={16} className="text-amber-400" /> Выдать буст {abuseOpen ? '▲' : '▼'}
+</button>
+{abuseOpen && (
+<div className="mt-3 space-y-2">
+<div className="flex gap-2">
+<input
+type="number"
+placeholder="Множитель"
+value={abuseMult}
+onChange={e => setAbuseMult(e.target.value)}
+className="font-body flex-1 rounded-md bg-stone-700 text-white px-3 py-2 text-sm focus:outline-none"
+/>
+<input
+type="number"
+placeholder="Минут"
+value={abuseMinutes}
+onChange={e => setAbuseMinutes(e.target.value)}
+className="font-body flex-1 rounded-md bg-stone-700 text-white px-3 py-2 text-sm focus:outline-none"
+/>
+</div>
+<div className="flex gap-2">
+<button onClick={handleGrantAll} className="font-body flex-1 bg-red-700 text-white rounded-md py-2 text-sm font-bold">
+Для всех
+</button>
+<button onClick={() => setAbuseTarget(t => t === 'one' ? null : 'one')} className="font-body flex-1 bg-orange-700 text-white rounded-md py-2 text-sm font-bold">
+Для одного игрока
+</button>
+</div>
+{abuseTarget === 'one' && (
+<div className="space-y-1 max-h-40 overflow-y-auto">
+{list.map(p => (
+<button
+key={fullNameOf(p)}
+onClick={() => handleGrantOne(fullNameOf(p))}
+className="font-body w-full text-left bg-stone-700 text-white rounded-md px-3 py-1.5 text-xs flex items-center gap-2"
+>
+<span className={w-2 h-2 rounded-full${isOnline(p) ? 'bg-green-500' : 'bg-stone-500'}`} />
+{fullNameOf(p)}
+</button>
+))}
+</div>
+)}
+</div>
+)}
+</div>
+
+<div className="flex items-center justify-between mb-2">
+<div className="font-body text-white font-bold text-sm flex items-center gap-2">
+<Users size={16} /> Игроки ({list.length})
+</div>
+<button onClick={refreshOwnerPanel} className="text-stone-400">
+<RefreshCw size={15} />
+</button>
+</div>
+<div className="space-y-2">
+{list.length === 0 && (
+<div className="font-body text-stone-500 text-sm">В зоопарке пока никого — поделись ссылкой с друзьями.</div>
+)}
+{list.map(p => {
+const pName = fullNameOf(p);
+const pTempActive = p.boostExpiresAt && p.boostExpiresAt > Date.now();
+const pBlockedForever = p.blockedForever;
+const pBlockedTemp = p.blockedUntil && p.blockedUntil > Date.now();
+const pBlockRemainMin = pBlockedTemp ? Math.ceil((p.blockedUntil - Date.now()) / 60000) : 0;
+return (
+<div key={pName} className="bg-stone-800 rounded-lg p-3 border border-stone-700 space-y-2">
+<div className="flex items-center justify-between">
+<div className="font-body text-white font-bold flex items-center gap-2 text-sm">
+<span className={w-2 h-2 rounded-full ${isOnline(p) ? 'bg-green-500' : 'bg-stone-600'}`} />
+<span className="text-xl">{ANIMALS.find(a => a.id === p.animal)?.emoji || '❓'}</span>
+{pName}
+</div>
+<div className="font-display text-amber-500 flex items-center gap-1 text-sm">
+<Coins size={13} /> {fmt(p.coins)}
+</div>
+</div>
+
+{(p.permanentTier > 0 || p.rebirths > 0 || pTempActive || pBlockedForever || pBlockedTemp) && (
+<div className="font-body text-xs flex flex-wrap gap-2">
+{p.rebirths > 0 && <span className="text-purple-400">♻️ x{fmtMult(rebirthMultiplier(p.rebirths))} ({p.rebirths})</span>}
+{p.permanentTier > 0 && <span className="text-amber-400">x{permMultForTier(p.permanentTier)} постоянный</span>}
+{pTempActive && (
+<span className="text-red-400 flex items-center gap-1">
+x{p.boostMultiplier} временный
+<button onClick={() => removeBoost(pName)} className="underline">снять</button>
+</span>
+)}
+{pBlockedForever && <span className="text-red-500">🔒 навсегда</span>}
+{pBlockedTemp && <span className="text-orange-400">🔒 ещё ~{pBlockRemainMin} мин</span>}
+</div>
+)}
+
+<div className="flex items-center gap-1.5">
+<input
+type="number"
+className="font-body w-14 rounded-md bg-stone-700 text-white px-2 py-1 text-xs"
+value={amountInputs[pName] ?? 50}
+onChange={e => setAmountInputs(a => ({ ...a, [pName]: Number(e.target.value) }))}
+/>
+<button onClick={() => adjustCoins(pName, amountInputs[pName] ?? 50)} className="bg-green-700 text-white rounded-md p-1.5">
+<Plus size={13} />
+</button>
+<button onClick={() => adjustCoins(pName, -(amountInputs[pName] ?? 50))} className="bg-red-700 text-white rounded-md p-1.5">
+<Minus size={13} />
+</button>
+<button onClick={() => zeroCoins(pName)} className="font-body bg-stone-600 text-white rounded-md px-2 py-1.5 text-xs">
+0
+</button>
+<button onClick={() => kickPlayer(pName)} className="font-body ml-auto text-stone-400 hover:text-red-400 text-xs flex items-center gap-1 px-1">
+<UserX size={13} /> Кик
+</button>
+</div>
+
+<div className="flex items-center gap-1.5">
+<input
+type="number"
+placeholder="мин"
+className="font-body w-14 rounded-md bg-stone-700 text-white px-2 py-1 text-xs"
+value={blockMinuteInputs[pName] ?? 10}
+onChange={e => setBlockMinuteInputs(a => ({ ...a, [pName]: Number(e.target.value) }))}
+/>
+<button onClick={() => blockTemp(pName)} className="font-body bg-orange-700 text-white rounded-md px-2 py-1.5 text-xs">
+Блок
+</button>
+<button onClick={() => blockForever(pName)} className="font-body bg-red-800 text-white rounded-md px-2 py-1.5 text-xs">
+Навсегда
+</button>
+{(pBlockedForever || pBlockedTemp) && (
+<button onClick={() => unblockPlayer(pName)} className="font-body bg-green-700 text-white rounded-md px-2 py-1.5 text-xs ml-auto">
+Разблок
+</button>
+)}
+</div>
+
+{p.comment && (
+<div className="bg-stone-900 rounded-md p-2">
+<div className="font-body text-xs text-stone-300 flex items-start gap-1">
+<MessageCircle size={12} className="mt-0.5 shrink-0" /> {p.comment}
+</div>
+<div className="flex gap-1.5 mt-1.5">
+<input
+className="font-body flex-1 rounded-md bg-stone-700 text-white px-2 py-1 text-xs focus:outline-none"
+placeholder="Ответить…"
+value={replyInputs[pName] || ''}
+onChange={e => setReplyInputs(r => ({ ...r, [pName]: e.target.value }))}
+onKeyDown={e => { if (e.key === 'Enter') sendReply(pName); }}
+maxLength={200}
+/>
+<button onClick={() => sendReply(pName)} className="bg-amber-600 text-white rounded-md px-2 text-xs">
+ОК
+</button>
+</div>
+{p.ownerReply && <div className="font-body text-xs text-green-400 mt-1">Ты ответил: {p.ownerReply}</div>}
+</div>
+)}
+</div>
+);
+})}
+</div>
+</div>
+</div>
+);
+}
+
+const globalBlock = gameState.blocked && !user.isOwner;
+const personalBlock = isPersonallyBlocked(user);
+const isBlockedNow = globalBlock || personalBlock;
+const activeEv = gameState.activeEvent && gameState.activeEvent.expiresAt > Date.now() ? gameState.activeEvent : null;
+
+return (
+<div className="min-h-screen w-full paper-bg flex flex-col items-center p-4 relative overflow-hidden">
+<style>{GLOBAL_STYLE}</style>
+
+{broadcastToast && (
+<div className="font-body fixed top-4 left-1/2 -translate-x-1/2 bg-stone-900 text-white px-4 py-3 rounded-lg shadow-xl z-50 max-w-xs text-center text-sm font-bold">
+📢 {broadcastToast}
+</div>
+)}
+{replyToast && (
+<div className="font-body fixed top-24 left-1/2 -translate-x-1/2 bg-green-800 text-white px-4 py-3 rounded-lg shadow-xl z-50 max-w-xs text-center text-sm font-bold">
+💬 Владелец ответил: {replyToast}
+</div>
+)}
+
+<div className="w-full max-w-sm flex items-center justify-between mt-2 mb-1">
+<div className="font-body text-stone-800 font-bold flex items-center gap-1 text-sm">
+{user.isOwner && <Crown size={15} className="text-amber-600" />}
+{user.firstName} {user.lastName}
+</div>
+<div className="flex items-center gap-1.5 flex-wrap justify-end">
+<button onClick={() => setScreen('events')} className="bg-white border-2 border-stone-900 text-stone-700 rounded-md p-2">
+<PartyPopper size={15} />
+</button>
+<button onClick={enterGiftScreen} className="bg-white border-2 border-stone-900 text-stone-700 rounded-md p-2">
+<Gift size={15} />
+</button>
+{user.isOwner && (
+<button onClick={enterOwnerPanel} className="bg-stone-900 text-amber-500 rounded-md p-2">
+<Crown size={15} />
+</button>
+)}
+<button onClick={handleLogout} className="bg-white border-2 border-stone-900 text-stone-700 rounded-md p-2">
+<LogOut size={15} />
+</button>
+</div>
+</div>
+<button onClick={() => setScreen('help')} className="font-body text-stone-400 text-xs underline mb-3 flex items-center gap-1">
+<HelpCircle size={12} /> как играть?
+</button>
+
+<div className="bg-amber-600 rounded-full px-6 py-2 mb-3 flex items-center gap-2 border-4 border-stone-900">
+<Coins className="text-white" size={20} />
+<span className="font-display text-2xl text-white tabular-nums">{fmt(user.coins)}</span>
+</div>
+
+{activeEv && (
+<div className={pulse-glow font-body bg-white border-2 border-amber-600 rounded-full px-4 py-1.5 mb-4 flex items-center gap-2 text-sm font-bold text-stone-800${activeEv.type === 'disco' ? 'disco-spin' : ''}`}>
+{EVENTS[activeEv.type].emoji} {EVENTS[activeEv.type].label} x{activeEv.mult}
+</div>
+)}
+
+{isBlockedNow ? (
+<div className="bg-white rounded-xl p-8 text-center max-w-xs border-2 border-stone-900">
+<div className="text-4xl mb-2">🔒</div>
+{personalBlock ? (
+<>
+<div className="font-display text-green-900 text-lg tracking-wide">ТЫ ЗАБЛОКИРОВАН</div>
+<div className="font-body text-stone-500 text-sm mt-1">
+{user.blockedForever ? 'Владелец заблокировал тебя навсегда' : Осталось ${bmm}:${bss.toString().padStart(2, '0')}}
+</div>
+</>
+) : (
+<>
+<div className="font-display text-green-900 text-lg tracking-wide">ИГРА ЗАБЛОКИРОВАНА</div>
+<div className="font-body text-stone-500 text-sm mt-1">Владелец скоро откроет её снова</div>
+</>
+)}
+</div>
+) : (
+<>
+<div className="relative w-56 h-56 flex items-center justify-center">
+<button
+onClick={handleAnimalClick}
+className={w-56 h-56 rounded-full bg-white border-8 border-green-900 flex items-center justify-center transition-transform duration-100 ${isPunching ? 'scale-90' : 'scale-100'}} style={{ boxShadow:0 8px 0 ${GREEN} }}
+>
+<div className="w-44 h-44 rounded-full border-4 border-amber-600 flex items-center justify-center bg-amber-50">
+<span className="text-8xl select-none">{animalMeta?.emoji || '🐾'}</span>
+</div>
+</button>
+{ripples.map(r => (
+<div key={r.id} className="ripple absolute top-0 left-0 w-56 h-56 rounded-full border-4 pointer-events-none" style={{ borderColor: GOLD }} />
+))}
+{floaters.map(f => (
+<div key={f.id} className="floater font-display absolute text-2xl pointer-events-none" style={{ color: GOLD, top: '15%', left: '50%' }}>
+{f.text}
+</div>
+))}
+</div>
+
+<button onClick={() => setScreen('animal')} className="font-body text-stone-500 text-xs mt-3 underline">
+сменить животное
+</button>
+
+{totalMult > 1 && (
+<div className="font-body mt-4 bg-red-700 text-white rounded-full px-4 py-1.5 flex items-center gap-2 font-bold text-sm">
+<Zap size={15} /> x{fmtMult(totalMult)} {tempActive ? — ещё ${mm}:${ss.toString().padStart(2, '0')} : ''}
+</div>
+)}
+
+<div className="w-full max-w-sm mt-6">
+<div className="font-body text-xs text-stone-500 font-bold mb-2 tracking-wide flex items-center justify-between">
+<span>ВРЕМЕННЫЕ БУСТЫ</span>
+{(user.totalEarned || 0) >= SCALE_THRESHOLD && <span className="text-red-600">цены выросли</span>}
+</div>
+<div className="space-y-2">
+{TEMP_BOOSTS.map((b, i) => {
+const cost = tempBoostCost(i, user.totalEarned);
+const dis = tempActive || user.coins < cost;
+const sc = i === 0 ? GREEN : i === 1 ? RED : GOLD;
+const iconColor = i === 0 ? 'text-green-800' : i === 1 ? 'text-red-700' : 'text-amber-600';
+return (
+<button
+key={b.mult}
+onClick={() => buyTempBoost(i)}
+disabled={dis}
+style={{ '--sc': sc }}
+className="stamp-btn w-full bg-white disabled:opacity-40 rounded-md px-4 py-2.5 flex items-center justify-between border-2 border-stone-900"
+>
+<span className="font-display text-stone-800 text-sm flex items-center gap-2">
+<Zap size={16} className={iconColor} /> x{b.mult} на {b.minutes} мин
+</span>
+<span className="font-body text-xs text-stone-500">{fmt(cost)} монет</span>
+</button>
+);
+})}
+</div>
+</div>
+
+<div className="w-full max-w-sm mt-4">
+<div className="font-body text-xs text-stone-500 font-bold mb-2 tracking-wide">ПОСТОЯННЫЙ БУСТ</div>
+<button
+onClick={buyPermanentBoost}
+disabled={user.coins < nextPermCost(user.permanentTier || 0)}
+style={{ '--sc': GOLD }}
+className="stamp-btn w-full bg-amber-50 disabled:opacity-40 rounded-md px-4 py-3 flex items-center justify-between border-2 border-stone-900"
+>
+<span className="font-display text-stone-800 text-sm">x{nextPermMult(user.permanentTier || 0)} НАВСЕГДА</span>
+<span className="font-body text-xs text-stone-500">{fmt(nextPermCost(user.permanentTier || 0))} монет</span>
+</button>
+{user.permanentTier > 0 && (
+<div className="font-body text-xs text-stone-500 mt-1 text-center">сейчас: x{permMult}</div>
+)}
+</div>
+
+<div className="w-full max-w-sm mt-4 mb-6">
+<div className="font-body text-xs text-stone-500 font-bold mb-2 tracking-wide">ПЕРЕРОЖДЕНИЕ</div>
+{(user.rebirths || 0) >= REBIRTH_MAX ? (
+<div className="font-body text-xs text-stone-500 text-center bg-white border-2 border-stone-900 rounded-md py-3">
+Достигнут максимум — 100 перерождений
+</div>
+) : (
+<button
+onClick={handleRebirth}
+disabled={user.coins < rebirthCostFor((user.rebirths || 0) + 1)}
+style={{ '--sc': RED }}
+className="stamp-btn w-full bg-white disabled:opacity-40 rounded-md px-4 py-3 flex items-center justify-between border-2 border-stone-900"
+>
+<span className="font-display text-stone-800 text-sm flex items-center gap-2">
+<Repeat size={16} className="text-red-700" /> Переродиться → x{fmtMult(rebirthMultiplier((user.rebirths || 0) + 1))}
+</span>
+<span className="font-body text-xs text-stone-500">{fmt(rebirthCostFor((user.rebirths || 0) + 1))} монет</span>
+</button>
+)}
+{(user.rebirths || 0) > 0 && (
+<div className="font-body text-xs text-stone-500 mt-1 text-center">
+сейчас: x{fmtMult(rebirthMultiplier(user.rebirths))} ({user.rebirths}/{REBIRTH_MAX})
+</div>
+)}
+<div className="font-body text-xs text-stone-400 mt-1 text-center">обнуляет монеты, буст и постоянный буст сохраняются</div>
+</div>
+</>
+)}
+</div>
+);
+function achievementsView(){
+ const u=state.user;awardAchievements(u);
+ return `<main class="page"><button class="back" onclick="state.screen='game';render()">← Назад</button><h2 class="center-text">🏆 ДОСТИЖЕНИЯ</h2><div class="narrow ach-grid">${ACHIEVEMENTS.map(([id,name,check])=>{const done=!!u.achievements?.[id];return `<div class="ach ${done?"done":""}"><b>${done?"✅":"🔒"} ${name}</b><small>${done?"Открыто":"Выполни условие, чтобы открыть"}</small></div>`}).join("")}</div></main>`;
+}
+}
