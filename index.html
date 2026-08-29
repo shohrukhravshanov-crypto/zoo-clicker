@@ -1,1199 +1,310 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Crown, Coins, Zap, LogOut, Users, Megaphone, UserX, RefreshCw, Lock, Unlock, Plus, Minus, MessageCircle, Gift, PartyPopper, Repeat, HelpCircle } from 'lucide-react';
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Zoo Clicker</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#fffbeb;color:#29251f;font-family:Arial,sans-serif}
+.wrap{max-width:520px;margin:auto;padding:16px;min-height:100vh}
+.card{background:#fff;border:2px solid #29251f;border-radius:14px;padding:16px;margin:12px 0}
+h1,h2,h3{text-align:center}.center{text-align:center}.coins{font-size:34px;font-weight:900;text-align:center}
+input,button{font:inherit;border:2px solid #29251f;border-radius:9px;padding:10px}input{width:100%;margin:4px 0}button{background:#f4c84a;font-weight:800;cursor:pointer}button:active{transform:translateY(1px)}
+button.disabled-cost{opacity:.45;filter:grayscale(.35);cursor:not-allowed}
+button.affordable-cost{opacity:1;background:rgba(244,200,74,.18)}
+.row{display:flex;gap:7px}.row>*{flex:1}.animal{display:block;width:220px;height:220px;border-radius:50%;font-size:110px;margin:18px auto;background:#d9f0c7;box-shadow:5px 5px 0 #29251f}
+.badge{display:inline-block;padding:5px 8px;border-radius:20px;background:#eee5cf;margin:3px;font-weight:700}
+.bar{height:12px;background:#ddd;border-radius:10px;overflow:hidden;border:1px solid #29251f}.bar i{display:block;height:100%;background:#64a653}
+.danger{background:#ef9a9a}.green{background:#9dd49a}.blue{background:#a8d8f0}.dark{background:#29251f;color:#fff}
+.player{border:1px solid #bbb;padding:10px;border-radius:9px;margin:8px 0}.small{font-size:12px;color:#70695f}
+.hidden{display:none}.msg{text-align:center;font-weight:700;min-height:22px}
 
-const ANIMALS = [
-{ id: 'cat', emoji: '🐱', name: 'Кот' },
-{ id: 'dog', emoji: '🐶', name: 'Пёс' },
-{ id: 'fox', emoji: '🦊', name: 'Лиса' },
-{ id: 'panda', emoji: '🐼', name: 'Панда' },
-{ id: 'lion', emoji: '🦁', name: 'Лев' },
-{ id: 'rabbit', emoji: '🐰', name: 'Кролик' },
-{ id: 'bear', emoji: '🐻', name: 'Медведь' },
-{ id: 'tiger', emoji: '🐯', name: 'Тигр' },
-{ id: 'koala', emoji: '🐨', name: 'Коала' },
-{ id: 'penguin', emoji: '🐧', name: 'Пингвин' },
-];
+.announcement{position:fixed;left:50%;top:18px;transform:translateX(-50%);z-index:10000;width:min(92vw,720px);background:#fff!important;color:#000!important;border:1px solid #ddd;border-radius:16px;padding:12px 16px;box-shadow:0 10px 30px rgba(0,0,0,.25);display:none}
+.announcement.show{display:block;animation:announceIn .35s ease-out}
+.announcement .who{font-weight:900;color:#000!important;margin-bottom:4px}
+.announcement .text{font-size:16px;line-height:1.35;color:#000!important;overflow-wrap:anywhere}
+.announce-form{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
+.announce-form input{flex:1;min-width:180px}
+@keyframes announceIn{from{opacity:0;transform:translate(-50%,-12px)}to{opacity:1;transform:translate(-50%,0)}}
+.float-coin{position:fixed;z-index:99999;pointer-events:none;font-size:25px;font-weight:900;transform:translate(-50%,0);text-shadow:2px 2px 0 #fff;animation:coinFly 2.8s ease-out forwards}
+@keyframes coinFly{0%{opacity:0;transform:translate(-50%,10px) scale(.7)}10%{opacity:1;transform:translate(-50%,0) scale(1.12)}82%{opacity:1}100%{opacity:0;transform:translate(-50%,-92vh) scale(.95)}}
+12%{opacity:1;transform:translate(-50%,0) scale(1.15)}100%{opacity:0;transform:translate(-50%,-75vh) scale(1)}}
 
-const OWNER_CODE = 'BOSS2026';
-const SCALE_THRESHOLD = 1000;
-const TEMP_BOOSTS = [
-{ mult: 2, baseCost: 200, scaledCost: 2000, minutes: 10 },
-{ mult: 4, baseCost: 500, scaledCost: 5000, minutes: 10 },
-{ mult: 10, baseCost: 2000, scaledCost: 15000, minutes: 20 },
-];
-const PERM_BASE_COST = 150;
-const REBIRTH_BASE_COST = 50;
-const REBIRTH_COST_MULT = 8;
-const REBIRTH_MAX = 100;
-const REBIRTH_BASE_MULT = 1.5;
-const EVENTS = {
-evening: { cost: 100000, mult: 1.5, minutes: 10, emoji: '🌆', label: 'Вечернее событие' },
-disco: { cost: 500000, mult: 2.5, minutes: 15, emoji: '🪩', label: 'Диско' },
-gold: { cost: 0, mult: 10, minutes: 20, emoji: '✨', label: 'Gold Event', ownerOnly: true },
-};
-const ONLINE_MS = 30000;
-const HEARTBEAT_MS = 15000;
-const GREEN = '#14532d';
-const RED = '#b91c1c';
-const GOLD = '#d97706';
-
-const GLOBAL_STYLE = @import url('https://fonts.googleapis.com/css2?family=Russo+One&family=PT+Sans:wght@400;700&display=swap'); .font-display { font-family: 'Russo One', sans-serif; } .font-body { font-family: 'PT Sans', sans-serif; } .paper-bg { background-color: #fffbeb; background-image: radial-gradient(circle, rgba(28,25,23,0.05) 1px, transparent 1px); background-size: 15px 15px; } .stamp-btn { box-shadow: 4px 4px 0 var(--sc, ${GREEN}); transition: transform 0.08s linear, box-shadow 0.08s linear; }
-.stamp-btn:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--sc, ${GREEN}); } @keyframes floatUp { 0% { transform: translateX(-50%) translateY(0); opacity: 1; } 100% { transform: translateX(-50%) translateY(-60px); opacity: 0; } } .floater { animation: floatUp 0.8s ease-out forwards; } @keyframes ringOut { 0% { transform: scale(0.9); opacity: 0.7; } 100% { transform: scale(1.5); opacity: 0; } } .ripple { animation: ringOut 0.5s ease-out forwards; } @keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 0 0 rgba(217,119,6,0.4); } 50% { box-shadow: 0 0 0 8px rgba(217,119,6,0); } } .pulse-glow { animation: pulseGlow 1.5s ease-in-out infinite; } @keyframes discoHue { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } } .disco-spin { animation: discoHue 3s linear infinite; } @media (prefers-reduced-motion: reduce) { .floater, .ripple, .stamp-btn, .pulse-glow, .disco-spin { animation: none !important; transition: none !important; } };
-
-function fullNameOf(p) {
-return ${p.firstName} ${p.lastName};
-}
-function keyOf(fullName) {
-return player:${fullName}`;
-}
-function permMultForTier(tier) {
-return tier > 0 ? Math.pow(2, tier) : 1;
-}
-function nextPermMult(tier) {
-return Math.pow(2, tier + 1);
-}
-function nextPermCost(tier) {
-return PERM_BASE_COST * Math.pow(2, tier);
-}
-function rebirthMultiplier(rebirths) {
-return rebirths > 0 ? REBIRTH_BASE_MULT * Math.pow(2, rebirths - 1) : 1;
-}
-function rebirthCostFor(nextNum) {
-return REBIRTH_BASE_COST * Math.pow(REBIRTH_COST_MULT, nextNum - 1);
-}
-function isPersonallyBlocked(u) {
-if (!u) return false;
-if (u.blockedForever) return true;
-if (u.blockedUntil && u.blockedUntil > Date.now()) return true;
-return false;
-}
-function isOnline(p) {
-return !!(p.lastSeen && (Date.now() - p.lastSeen < ONLINE_MS));
-}
-function fmt(n) {
-return Math.floor(n || 0).toLocaleString('ru-RU');
-}
-function fmtMult(n) {
-return Number.isInteger(n) ? String(n) : n.toFixed(1);
-}
-function activeMultiplier(u, activeEvent) {
-const rebirth = rebirthMultiplier(u.rebirths || 0);
-const perm = permMultForTier(u.permanentTier || 0);
-const temp = (u.boostExpiresAt && u.boostExpiresAt > Date.now()) ? u.boostMultiplier : 1;
-const event = (activeEvent && activeEvent.expiresAt > Date.now()) ? activeEvent.mult : 1;
-return rebirth * perm * temp * event;
-}
-function tempBoostCost(idx, totalEarned) {
-const t = TEMP_BOOSTS[idx];
-return (totalEarned || 0) >= SCALE_THRESHOLD ? t.scaledCost : t.baseCost;
-}
-
-export default function ZooClickerGame() {
-const [screen, setScreen] = useState('auth');
-const [user, setUser] = useState(null);
-const userRef = useRef(null);
-useEffect(() => { userRef.current = user; }, [user]);
-
-const [firstName, setFirstName] = useState('');
-const [lastName, setLastName] = useState('');
-const [password, setPassword] = useState('');
-const [ownerCodeInput, setOwnerCodeInput] = useState('');
-const [commentInput, setCommentInput] = useState('');
-const [authError, setAuthError] = useState('');
-const [authLoading, setAuthLoading] = useState(false);
-const [kickedNotice, setKickedNotice] = useState(false);
-
-const [floaters, setFloaters] = useState([]);
-const [ripples, setRipples] = useState([]);
-const [isPunching, setIsPunching] = useState(false);
-const [, setTick] = useState(0);
-
-const [gameState, setGameState] = useState({ blocked: false, broadcastMessage: '', broadcastId: 0, activeEvent: null });
-const seenBroadcastRef = useRef(0);
-const seenReplyRef = useRef(0);
-const [broadcastToast, setBroadcastToast] = useState(null);
-const [replyToast, setReplyToast] = useState(null);
-
-const [players, setPlayers] = useState([]);
-const [broadcastInput, setBroadcastInput] = useState('');
-const [amountInputs, setAmountInputs] = useState({});
-const [blockMinuteInputs, setBlockMinuteInputs] = useState({});
-const [replyInputs, setReplyInputs] = useState({});
-
-const [abuseOpen, setAbuseOpen] = useState(false);
-const [abuseMult, setAbuseMult] = useState('2');
-const [abuseMinutes, setAbuseMinutes] = useState('10');
-const [abuseTarget, setAbuseTarget] = useState(null);
-
-const [giftAmount, setGiftAmount] = useState('');
-const [giftRecipient, setGiftRecipient] = useState(null);
-const [giftPlayers, setGiftPlayers] = useState([]);
-const [giftStatus, setGiftStatus] = useState('');
-
-const lastWriteRef = useRef(0);
-const pendingWriteRef = useRef(null);
-const lastClickRef = useRef(0);
-const lastHeartbeatRef = useRef(0);
-
-useEffect(() => {
-const t = setInterval(() => setTick(x => x + 1), 1000);
-return () => clearInterval(t);
-}, []);
-
-async function getPlayer(fullName) {
-try {
-const res = await window.storage.get(keyOf(fullName), true);
-return res ? JSON.parse(res.value) : null;
-} catch {
-return null;
-}
-}
-async function savePlayer(data) {
-try {
-await window.storage.set(keyOf(fullNameOf(data)), JSON.stringify(data), true);
-} catch (e) {
-console.error('save player failed', e);
-}
-}
-async function getGameStateStorage() {
-try {
-const res = await window.storage.get('game-state', true);
-return res ? JSON.parse(res.value) : { blocked: false, broadcastMessage: '', broadcastId: 0, activeEvent: null };
-} catch {
-return { blocked: false, broadcastMessage: '', broadcastId: 0, activeEvent: null };
-}
-}
-async function saveGameStateStorage(data) {
-try {
-await window.storage.set('game-state', JSON.stringify(data), true);
-} catch (e) { console.error(e); }
-}
-async function getPlayerList() {
-try {
-const res = await window.storage.get('player-list', true);
-return res ? JSON.parse(res.value) : [];
-} catch {
-return [];
-}
-}
-async function addToPlayerList(fullName) {
-const list = await getPlayerList();
-if (!list.includes(fullName)) {
-list.push(fullName);
-try {
-await window.storage.set('player-list', JSON.stringify(list), true);
-} catch (e) { console.error(e); }
-}
-}
-
-async function handleAuth() {
-const fn = firstName.trim();
-const ln = lastName.trim();
-setAuthError('');
-if (!fn || !ln || !password) {
-setAuthError('Введи имя, фамилию и пароль.');
-return;
-}
-const bad = /[\s/\'"]/;
-if (bad.test(fn) || bad.test(ln)) {
-setAuthError('Имя и фамилия без пробелов и кавычек.');
-return;
-}
-if (fn.length > 20 || ln.length > 20) {
-setAuthError('Имя и фамилия должны быть короче 20 символов.');
-return;
-}
-const fullName = ``${fn} ${ln};
-setAuthLoading(true);
-const existing = await getPlayer(fullName);
-const gs = await getGameStateStorage();
-if (existing) {
-if (existing.password !== password) {
-setAuthError('Неверный пароль.');
-setAuthLoading(false);
-return;
-}
-const toUse = { ...existing, kicked: false, lastSeen: Date.now() };
-await savePlayer(toUse);
-setUser(toUse);
-setGameState(gs);
-seenBroadcastRef.current = gs.broadcastId;
-seenReplyRef.current = existing.ownerReplyId || 0;
-setScreen(toUse.animal ? 'game' : 'animal');
-} else {
-const wantsOwner = ownerCodeInput.trim().toUpperCase() === OWNER_CODE;
-const fresh = {
-firstName: fn,
-lastName: ln,
-password,
-animal: null,
-coins: 0,
-totalEarned: 0,
-isOwner: wantsOwner,
-boostMultiplier: 1,
-boostExpiresAt: null,
-permanentTier: 0,
-rebirths: 0,
-blockedForever: false,
-blockedUntil: null,
-kicked: false,
-comment: commentInput.trim().slice(0, 200),
-ownerReply: '',
-ownerReplyId: 0,
-lastSeen: Date.now(),
-};
-await savePlayer(fresh);
-await addToPlayerList(fullName);
-setUser(fresh);
-setGameState(gs);
-seenBroadcastRef.current = gs.broadcastId;
-seenReplyRef.current = 0;
-setScreen('animal');
-}
-setAuthLoading(false);
-}
-
-function handleLogout() {
-setUser(null);
-setScreen('auth');
-setFirstName('');
-setLastName('');
-setPassword('');
-setOwnerCodeInput('');
-setCommentInput('');
-}
-
-function chooseAnimal(id) {
-const updated = { ...user, animal: id };
-setUser(updated);
-savePlayer(updated);
-setScreen('game');
-}
-
-function throttledSave(updated) {
-const now = Date.now();
-const elapsed = now - lastWriteRef.current;
-if (pendingWriteRef.current) {
-clearTimeout(pendingWriteRef.current);
-pendingWriteRef.current = null;
-}
-if (elapsed > 1000) {
-lastWriteRef.current = now;
-savePlayer(updated);
-} else {
-pendingWriteRef.current = setTimeout(() => {
-lastWriteRef.current = Date.now();
-savePlayer(updated);
-pendingWriteRef.current = null;
-}, 1000 - elapsed);
-}
-}
-
-function handleAnimalClick() {
-if (!user) return;
-if (gameState.blocked && !user.isOwner) return;
-if (isPersonallyBlocked(user)) return;
-lastClickRef.current = Date.now();
-const rawMult = activeMultiplier(user, gameState.activeEvent);
-const gain = Math.max(1, Math.round(rawMult));
-const updated = { ...user, coins: user.coins + gain, totalEarned: (user.totalEarned || 0) + gain };
-setUser(updated);
-throttledSave(updated);
-
-const id = Math.random().toString(36).slice(2);
-setFloaters(f => [...f, { id, text: +${gain}` }]);
-setTimeout(() => setFloaters(f => f.filter(t => t.id !== id)), 800);
-
-const rid = id + 'r';
-setRipples(r => [...r, { id: rid }]);
-setTimeout(() => setRipples(r => r.filter(t => t.id !== rid)), 500);
-
-setIsPunching(true);
-setTimeout(() => setIsPunching(false), 120);
-}
-
-function buyTempBoost(idx) {
-if (!user) return;
-const tier = TEMP_BOOSTS[idx];
-const cost = tempBoostCost(idx, user.totalEarned);
-if (user.coins < cost) return;
-if (user.boostExpiresAt && user.boostExpiresAt > Date.now()) return;
-const updated = { ...user, coins: user.coins - cost, boostMultiplier: tier.mult, boostExpiresAt: Date.now() + tier.minutes * 60000 };
-setUser(updated);
-lastWriteRef.current = Date.now();
-savePlayer(updated);
-}
-
-function buyPermanentBoost() {
-if (!user) return;
-const tier = user.permanentTier || 0;
-const cost = nextPermCost(tier);
-if (user.coins < cost) return;
-const updated = { ...user, coins: user.coins - cost, permanentTier: tier + 1 };
-setUser(updated);
-lastWriteRef.current = Date.now();
-savePlayer(updated);
-}
-
-function handleRebirth() {
-if (!user) return;
-const nextNum = (user.rebirths || 0) + 1;
-if (nextNum > REBIRTH_MAX) return;
-const cost = rebirthCostFor(nextNum);
-if (user.coins < cost) return;
-const newMult = rebirthMultiplier(nextNum);
-const ok = window.confirm(Переродиться? Все твои монеты (${fmt(user.coins)}) обнулятся. Новый множитель перерождений: x${fmtMult(newMult)}. Постоянный буст сохранится.);
-if (!ok) return;
-const updated = { ...user, coins: 0, rebirths: nextNum };
-setUser(updated);
-lastWriteRef.current = Date.now();
-savePlayer(updated);
-}
-
-async function startEvent(type) {
-if (!user) return;
-const cfg = EVENTS[type];
-if (!cfg) return;
-if (cfg.ownerOnly && !user.isOwner) return;
-if (gameState.activeEvent && gameState.activeEvent.expiresAt > Date.now()) return;
-if (cfg.cost > 0) {
-if (user.coins < cfg.cost) return;
-const updatedUser = { ...user, coins: user.coins - cfg.cost };
-setUser(updatedUser);
-lastWriteRef.current = Date.now();
-savePlayer(updatedUser);
-}
-const newGs = { ...gameState, activeEvent: { type, mult: cfg.mult, expiresAt: Date.now() + cfg.minutes * 60000 } };
-setGameState(newGs);
-await saveGameStateStorage(newGs);
-}
-
-useEffect(() => {
-if (!user) return;
-let cancelled = false;
-const iv = setInterval(async () => {
-const cur = userRef.current;
-if (!cur) return;
-const curFullName = fullNameOf(cur);
-const gs = await getGameStateStorage();
-if (cancelled) return;
-setGameState(gs);
-if (gs.broadcastId !== seenBroadcastRef.current && gs.broadcastMessage) {
-seenBroadcastRef.current = gs.broadcastId;
-setBroadcastToast(gs.broadcastMessage);
-setTimeout(() => setBroadcastToast(null), 6000);
-}
-const fresh = await getPlayer(curFullName);
-if (cancelled || !fresh) return;
-if (fresh.kicked) {
-await savePlayer({ ...fresh, kicked: false });
-setUser(null);
-setScreen('auth');
-setKickedNotice(true);
-return;
-}
-if (Date.now() - lastHeartbeatRef.current > HEARTBEAT_MS) {
-lastHeartbeatRef.current = Date.now();
-savePlayer({ ...cur, lastSeen: Date.now() });
-}
-if (fresh.ownerReplyId && fresh.ownerReplyId !== seenReplyRef.current && fresh.ownerReply) {
-seenReplyRef.current = fresh.ownerReplyId;
-setReplyToast(fresh.ownerReply);
-setTimeout(() => setReplyToast(null), 8000);
-}
-const recentlyClicked = Date.now() - lastClickRef.current < 1200;
-setUser(u => {
-if (!u) return u;
-return {
-...u,
-coins: recentlyClicked ? u.coins : fresh.coins,
-totalEarned: fresh.totalEarned,
-boostMultiplier: fresh.boostMultiplier,
-boostExpiresAt: fresh.boostExpiresAt,
-permanentTier: fresh.permanentTier,
-rebirths: fresh.rebirths,
-isOwner: fresh.isOwner,
-animal: fresh.animal || u.animal,
-blockedForever: fresh.blockedForever,
-blockedUntil: fresh.blockedUntil,
-ownerReply: fresh.ownerReply,
-ownerReplyId: fresh.ownerReplyId,
-};
-});
-if (cur.isOwner) {
-const list = await getPlayerList();
-const loaded = await Promise.all(list.map(n => getPlayer(n)));
-if (!cancelled) setPlayers(loaded.filter(Boolean));
-}
-}, 3000);
-return () => { cancelled = true; clearInterval(iv); };
-}, [!!user]);
-
-async function refreshOwnerPanel() {
-const list = await getPlayerList();
-const loaded = await Promise.all(list.map(n => getPlayer(n)));
-setPlayers(loaded.filter(Boolean));
-const gs = await getGameStateStorage();
-setGameState(gs);
-}
-
-function enterOwnerPanel() {
-setScreen('owner');
-refreshOwnerPanel();
-}
-
-async function adjustCoins(fullName, delta) {
-const p = await getPlayer(fullName);
-if (!p) return;
-const updated = { ...p, coins: Math.max(0, p.coins + delta) };
-await savePlayer(updated);
-setPlayers(ps => ps.map(pl => fullNameOf(pl) === fullName ? updated : pl));
-}
-
-async function zeroCoins(fullName) {
-const p = await getPlayer(fullName);
-if (!p) return;
-const updated = { ...p, coins: 0 };
-await savePlayer(updated);
-setPlayers(ps => ps.map(pl => fullNameOf(pl) === fullName ? updated : pl));
-}
-
-async function removeBoost(fullName) {
-const p = await getPlayer(fullName);
-if (!p) return;
-const updated = { ...p, boostMultiplier: 1, boostExpiresAt: null };
-await savePlayer(updated);
-setPlayers(ps => ps.map(pl => fullNameOf(pl) === fullName ? updated : pl));
-}
-
-async function kickPlayer(fullName) {
-const p = await getPlayer(fullName);
-if (!p) return;
-const updated = { ...p, kicked: true };
-await savePlayer(updated);
-setPlayers(ps => ps.map(pl => fullNameOf(pl) === fullName ? updated : pl));
-}
-
-async function blockTemp(fullName) {
-const minutes = blockMinuteInputs[fullName] ?? 10;
-if (!minutes || minutes <= 0) return;
-const p = await getPlayer(fullName);
-if (!p) return;
-const updated = { ...p, blockedForever: false, blockedUntil: Date.now() + minutes * 60000 };
-await savePlayer(updated);
-setPlayers(ps => ps.map(pl => fullNameOf(pl) === fullName ? updated : pl));
-}
-
-async function blockForever(fullName) {
-const p = await getPlayer(fullName);
-if (!p) return;
-const updated = { ...p, blockedForever: true, blockedUntil: null };
-await savePlayer(updated);
-setPlayers(ps => ps.map(pl => fullNameOf(pl) === fullName ? updated : pl));
-}
-
-async function unblockPlayer(fullName) {
-const p = await getPlayer(fullName);
-if (!p) return;
-const updated = { ...p, blockedForever: false, blockedUntil: null };
-await savePlayer(updated);
-setPlayers(ps => ps.map(pl => fullNameOf(pl) === fullName ? updated : pl));
-}
-
-async function toggleBlock() {
-const updated = { ...gameState, blocked: !gameState.blocked };
-setGameState(updated);
-await saveGameStateStorage(updated);
-}
-
-async function sendBroadcast() {
-const msg = broadcastInput.trim();
-if (!msg) return;
-const updated = { ...gameState, broadcastMessage: msg, broadcastId: (gameState.broadcastId || 0) + 1 };
-setGameState(updated);
-seenBroadcastRef.current = updated.broadcastId;
-await saveGameStateStorage(updated);
-setBroadcastInput('');
-}
-
-async function sendReply(fullName) {
-const msg = (replyInputs[fullName] || '').trim();
-if (!msg) return;
-const p = await getPlayer(fullName);
-if (!p) return;
-const updated = { ...p, ownerReply: msg.slice(0, 200), ownerReplyId: (p.ownerReplyId || 0) + 1 };
-await savePlayer(updated);
-setPlayers(ps => ps.map(pl => fullNameOf(pl) === fullName ? updated : pl));
-setReplyInputs(r => ({ ...r, [fullName]: '' }));
-}
-
-async function grantBoostToAll(mult, minutes) {
-const names = await getPlayerList();
-const expiresAt = Date.now() + minutes * 60000;
-for (const name of names) {
-const p = await getPlayer(name);
-if (p) await savePlayer({ ...p, boostMultiplier: mult, boostExpiresAt: expiresAt });
-}
-refreshOwnerPanel();
-}
-async function grantBoostToOne(fullName, mult, minutes) {
-const p = await getPlayer(fullName);
-if (!p) return;
-const updated = { ...p, boostMultiplier: mult, boostExpiresAt: Date.now() + minutes * 60000 };
-await savePlayer(updated);
-refreshOwnerPanel();
-}
-function handleGrantAll() {
-const mult = Number(abuseMult);
-const minutes = Number(abuseMinutes) || 10;
-if (!mult || mult <= 0) return;
-grantBoostToAll(mult, minutes);
-}
-function handleGrantOne(fullName) {
-const mult = Number(abuseMult);
-const minutes = Number(abuseMinutes) || 10;
-if (!mult || mult <= 0) return;
-grantBoostToOne(fullName, mult, minutes);
-}
-
-async function enterGiftScreen() {
-setScreen('gift');
-setGiftStatus('');
-setGiftRecipient(null);
-setGiftAmount('');
-const names = await getPlayerList();
-const loaded = await Promise.all(names.map(n => getPlayer(n)));
-setGiftPlayers(loaded.filter(p => p && fullNameOf(p) !== fullNameOf(user)));
-}
-
-async function confirmGift() {
-const amount = Math.floor(Number(giftAmount));
-if (!giftRecipient || !amount || amount <= 0) { setGiftStatus('Выбери получателя и сумму.'); return; }
-if (amount > user.coins) { setGiftStatus('Недостаточно монет.'); return; }
-const recipient = await getPlayer(giftRecipient);
-if (!recipient) { setGiftStatus('Игрок не найден.'); return; }
-const updatedRecipient = { ...recipient, coins: recipient.coins + amount };
-await savePlayer(updatedRecipient);
-const updatedSelf = { ...user, coins: user.coins - amount };
-setUser(updatedSelf);
-lastWriteRef.current = Date.now();
-savePlayer(updatedSelf);
-setGiftStatus(Подарено ${fmt(amount)} монет игроку ${giftRecipient}!);
-setGiftAmount('');
-setGiftRecipient(null);
-}
-
-const animalMeta = user ? ANIMALS.find(a => a.id === user.animal) : null;
-const permMult = user ? permMultForTier(user.permanentTier || 0) : 1;
-const tempActive = user && user.boostExpiresAt && user.boostExpiresAt > Date.now();
-const totalMult = user ? activeMultiplier(user, gameState.activeEvent) : 1;
-const tempRemaining = tempActive ? Math.max(0, user.boostExpiresAt - Date.now()) : 0;
-const mm = Math.floor(tempRemaining / 60000);
-const ss = Math.floor((tempRemaining % 60000) / 1000);
-const blockRemaining = user && user.blockedUntil ? Math.max(0, user.blockedUntil - Date.now()) : 0;
-const bmm = Math.floor(blockRemaining / 60000);
-const bss = Math.floor((blockRemaining % 60000) / 1000);
-
-if (screen === 'auth' || !user) {
-return (
-<div className="min-h-screen w-full paper-bg flex items-center justify-center p-4">
-<style>{GLOBAL_STYLE}
-.level-card{width:100%;max-width:380px;background:#fff;border:2px solid #1c1917;border-radius:10px;padding:10px 12px;margin:4px 0 10px}
-.level-card b{color:#14532d}.level-card small{display:block;color:#78716c;margin-top:3px}.levelbar{height:8px;background:#e7e5e4;border-radius:99px;overflow:hidden;margin-top:7px}.levelbar i{display:block;height:100%;background:#d97706}
-.feature-btn{width:100%;padding:10px 12px;background:#fff;border:2px solid #1c1917;border-radius:8px;text-align:left;margin-bottom:8px}.feature-btn b{font-family:'Russo One',sans-serif}.feature-btn small{display:block;color:#78716c;margin-top:3px}
-.ach-grid{display:grid;gap:8px}.ach{border:2px solid #d6d3d1;border-radius:8px;padding:9px;background:#fff}.ach.done{border-color:#15803d;background:#f0fdf4}.ach b{display:block}.ach small{color:#78716c}
+.online-panel{margin:10px 0;padding:10px 12px;border:1px solid #ddd;border-radius:14px;background:#fff;color:#000}
+.online-title{font-weight:900}.online-players{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
+.online-player{padding:5px 9px;border-radius:999px;background:#f1f1f1;color:#000;font-size:13px}
 </style>
-<div className="w-full max-w-sm">
-<div className="text-center mb-6">
-<div className="text-6xl mb-2">🎪</div>
-<h1 className="font-display text-4xl text-green-900 tracking-wide">ЗООКЛИКЕР</h1>
-<p className="font-body text-stone-600 text-sm mt-1">жми на животное — получай монеты</p>
+</head>
+<body>
+<div class="online-panel" id="onlinePanel">
+  <div class="online-title">🟢 Онлайн сейчас: <span id="onlineCount">0</span></div>
+  <div id="onlinePlayers" class="online-players"></div>
 </div>
-<div className="bg-white rounded-xl p-6 space-y-3 border-2 border-stone-900">
-{kickedNotice && (
-<div className="font-body bg-red-50 text-red-700 text-sm rounded-md px-3 py-2 text-center border border-red-200">
-Владелец тебя кикнул. Можешь войти снова.
-</div>
-)}
-<div className="flex gap-2">
-<input
-className="font-body flex-1 rounded-md border-2 border-stone-300 px-3 py-3 text-stone-900 focus:outline-none focus:border-green-800"
-placeholder="Имя"
-value={firstName}
-onChange={e => setFirstName(e.target.value)}
-onKeyDown={e => { if (e.key === 'Enter') handleAuth(); }}
-maxLength={20}
-/>
-<input
-className="font-body flex-1 rounded-md border-2 border-stone-300 px-3 py-3 text-stone-900 focus:outline-none focus:border-green-800"
-placeholder="Фамилия"
-value={lastName}
-onChange={e => setLastName(e.target.value)}
-onKeyDown={e => { if (e.key === 'Enter') handleAuth(); }}
-maxLength={20}
-/>
-</div>
-<input
-className="font-body w-full rounded-md border-2 border-stone-300 px-4 py-3 text-stone-900 focus:outline-none focus:border-green-800"
-placeholder="Пароль"
-type="password"
-value={password}
-onChange={e => setPassword(e.target.value)}
-onKeyDown={e => { if (e.key === 'Enter') handleAuth(); }}
-/>
-<input
-className="font-body w-full rounded-md border-2 border-stone-300 px-4 py-3 text-stone-900 focus:outline-none focus:border-green-800"
-placeholder="Код владельца (не обязательно)"
-value={ownerCodeInput}
-onChange={e => setOwnerCodeInput(e.target.value)}
-onKeyDown={e => { if (e.key === 'Enter') handleAuth(); }}
-/>
-<textarea
-className="font-body w-full rounded-md border-2 border-stone-300 px-4 py-3 text-stone-900 focus:outline-none focus:border-green-800 resize-none"
-placeholder="Комментарий владельцу (не обязательно)"
-value={commentInput}
-onChange={e => setCommentInput(e.target.value)}
-maxLength={200}
-rows={2}
-/>
-{authError && <div className="font-body text-red-700 text-sm text-center">{authError}</div>}
-<button
-onClick={handleAuth}
-disabled={authLoading}
-style={{ '--sc': GREEN }}
-className="stamp-btn font-display w-full bg-amber-600 text-white tracking-wide rounded-md py-3 border-2 border-stone-900 disabled:opacity-50"
->
-{authLoading ? 'СЕКУНДУ…' : 'ВОЙТИ'}
-</button>
-<p className="font-body text-xs text-stone-500 text-center">
-Новые имя и фамилия создадут аккаунт. Существующие — нужен пароль.
-</p>
-</div>
-</div>
-</div>
-);
+<div id="announcement" class="announcement"><div class="who" id="announcementWho"></div><div class="text" id="announcementText"></div></div>
+<div id="app" class="wrap"></div>
+<script>
+const OWNER_CODE="BOSS2026";
+const STORE="zoo_clicker_v4";
+const ANIMALS=["🐱","🐶","🦊","🐼","🦁","🐰","🐻","🐯","🐨","🐧"];
+const ACH=[
+ ["first","🐾 Первый клик",p=>p.total>=1],
+ ["100","💯 100 коинов",p=>p.total>=100],
+ ["1000","🔥 1 000 коинов",p=>p.total>=1000],
+ ["10000","💰 10 000 коинов",p=>p.total>=10000],
+ ["lvl10","⭐ Уровень 10",p=>level(p)>=10],
+ ["lvl50","🌟 Уровень 50",p=>level(p)>=50],
+ ["lvl100","👑 Уровень 100",p=>level(p)>=100],
+ ["daily","🎁 Ежедневная награда",p=>p.dailyEver],
+ ["rebirth","♻️ Перерождение",p=>p.rebirths>0]
+];
+let db=load(), me=null, view="login";
+
+
+function showAnnouncement(who,text,owner=false){
+ const box=document.getElementById("announcement"),w=document.getElementById("announcementWho"),x=document.getElementById("announcementText");
+ if(!box||!w||!x)return;
+ w.textContent=owner?"🎙️ Владелец":who;
+ x.textContent=text;
+ box.classList.remove("show");void box.offsetWidth;box.classList.add("show");
+ clearTimeout(window.announceTimer);window.announceTimer=setTimeout(()=>box.classList.remove("show"),10000);
+}
+function announcementCost(){return 1000000000}
+function sendAnnouncement(){
+ const input=document.getElementById("announcementInput"); if(!input)return;
+ const text=input.value.trim();
+ if(!text)return toast("Напиши сообщение.");
+ const cost=announcementCost();
+ if(me.coins<cost)return toast("Не хватает 1 000 000 000 коинов.");
+ me.coins-=cost;
+ me.lastSeen=Date.now();
+ db.announcements=db.announcements||[];
+ const ann={name:(me.first+" "+me.last).trim(),text,owner:!!me.owner,at:Date.now()};db.announcements.push(ann);if(window.zooBroadcast)zooBroadcast("announcement",ann);
+ if(db.announcements.length>20)db.announcements.shift();
+ save();render();showAnnouncement((me.first+" "+me.last).trim(),text,!!me.owner);
+ input.value="";
+}
+function ownerAnnouncement(){
+ const input=document.getElementById("ownerAnnouncementInput"); if(!input)return;
+ const text=input.value.trim(); if(!text)return toast("Напиши объявление.");
+ db.announcements=db.announcements||[];
+ const ann={name:"Владелец",text,owner:true,at:Date.now()};db.announcements.push(ann);if(window.zooBroadcast)zooBroadcast("announcement",ann);
+ if(db.announcements.length>20)db.announcements.shift();
+ save();render();showAnnouncement("Владелец",text,true);input.value="";
+}
+function renderAnnouncements(){
+ const a=db.announcements&&db.announcements.length?db.announcements[db.announcements.length-1]:null;
+ if(a)showAnnouncement(a.name,a.text,!!a.owner);
 }
 
-if (screen === 'animal') {
-return (
-<div className="min-h-screen w-full paper-bg p-4 flex flex-col items-center justify-center">
-<style>{GLOBAL_STYLE}</style>
-<h2 className="font-display text-2xl text-green-900 mb-1 tracking-wide">ВЫБЕРИ ЖИВОТНОЕ</h2>
-<p className="font-body text-stone-500 text-sm mb-6">потом можно поменять</p>
-<div className="grid grid-cols-3 gap-3 max-w-sm w-full">
-{ANIMALS.map(a => (
-<button
-key={a.id}
-onClick={() => chooseAnimal(a.id)}
-className="bg-white rounded-full aspect-square border-4 border-green-900 hover:border-amber-600 active:scale-95 transition p-2 flex flex-col items-center justify-center gap-0.5"
->
-<span className="text-4xl">{a.emoji}</span>
-<span className="font-body text-xs text-stone-600 font-bold">{a.name}</span>
-</button>
-))}
-</div>
-</div>
-);
+function load(){try{return JSON.parse(localStorage.getItem(STORE))||{players:{},global:{boost:1,until:0}}}catch(e){return{players:{},global:{boost:1,until:0}}}}
+function save(){localStorage.setItem(STORE,JSON.stringify(db))}
+
+function broadcastGlobalBoost(){
+ if(window.zooBroadcast)zooBroadcast("global",db.global);
 }
-
-if (screen === 'help') {
-return (
-<div className="min-h-screen w-full paper-bg p-4">
-<style>{GLOBAL_STYLE}</style>
-<button onClick={() => setScreen('game')} className="font-body text-stone-600 text-sm underline mb-4">← Назад</button>
-<h2 className="font-display text-2xl text-green-900 mb-4 tracking-wide text-center">❓ КАК ИГРАТЬ</h2>
-<div className="max-w-sm mx-auto bg-white border-2 border-stone-900 rounded-xl p-5 space-y-3 font-body text-sm text-stone-700">
-<p>🐾 Жми на животное — за каждый тап получаешь монеты.</p>
-<p>⚡ Временные бусты ускоряют заработок на время. После 1000 накопленных монет они дорожают.</p>
-<p>💠 Постоянный буст навсегда удваивает множитель — с каждой покупкой дороже вдвое.</p>
-<p>♻️ Перерождение обнуляет монеты, зато навсегда усиливает множитель. До 100 перерождений.</p>
-<p>🎉 События дают буст сразу всем игрокам на время.</p>
-<p>🎁 Монетами можно делиться с другими игроками.</p>
-<p>👑 У игры есть владелец — он может как помогать, так и мешать. Это часть веселья!</p>
-</div>
-</div>
-);
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function fmt(n){return Math.floor(Number(n)||0).toLocaleString("ru-RU")}
+function name(p){return p.first+" "+p.last}
+function level(p){let l=1;while(l<100&&p.total>=100*Math.pow(10,l-1))l++;return l}
+function levelStart(l){return l<=1?0:100*Math.pow(10,l-2)}
+function levelNext(l){return l>=100?null:100*Math.pow(10,l-1)}
+function lvlBoost(p){return level(p)>=2?1.5:1}
+function totalBoost(p){
+ let t=p.boostUntil>Date.now()?p.boost:1;
+ let g=db.global.until>Date.now()?db.global.boost:1;
+ return lvlBoost(p)*Math.pow(2,p.perm||0)*(p.rebirths?1.5*Math.pow(2,p.rebirths-1):1)*t*g;
 }
+function check(p){p.ach=p.ach||{};for(const [id,,fn] of ACH)if(!p.ach[id]&&fn(p))p.ach[id]=Date.now()}
+function today(){return new Date().toISOString().slice(0,10)}
+function toast(s){const e=document.getElementById("msg");if(e){e.textContent=s;setTimeout(()=>{if(e)e.textContent=""},2200)}}
+function render(){if(view==="login")loginView();else if(view==="animal")animalView();else if(view==="game")gameView();else if(view==="ach")achView();else if(view==="admin")adminView()}
 
-if (screen === 'gift') {
-return (
-<div className="min-h-screen w-full paper-bg p-4">
-<style>{GLOBAL_STYLE}</style>
-<button onClick={() => setScreen('game')} className="font-body text-stone-600 text-sm underline mb-4">← Назад</button>
-<h2 className="font-display text-2xl text-green-900 mb-1 tracking-wide text-center">🎁 ПОДАРИТЬ МОНЕТЫ</h2>
-<p className="font-body text-stone-500 text-sm mb-4 text-center">у тебя {fmt(user.coins)} монет</p>
-<div className="max-w-sm mx-auto">
-<input
-type="number"
-placeholder="Сколько подарить"
-value={giftAmount}
-onChange={e => setGiftAmount(e.target.value)}
-className="font-body w-full rounded-md border-2 border-stone-300 px-4 py-3 text-stone-900 focus:outline-none focus:border-green-800 mb-3"
-/>
-{giftStatus && <div className="font-body text-sm text-green-800 text-center mb-3">{giftStatus}</div>}
-<div className="space-y-2 mb-4">
-{giftPlayers.length === 0 && <div className="font-body text-stone-500 text-sm text-center">Пока больше никого нет в зоопарке.</div>}
-{giftPlayers.map(p => {
-const pName = fullNameOf(p);
-const selected = giftRecipient === pName;
-return (
-<button
-key={pName}
-onClick={() => setGiftRecipient(pName)}
-className={font-body w-full rounded-md border-2 px-4 py-2.5 flex items-center gap-2 ${selected ? 'border-green-900 bg-green-50' : 'border-stone-300 bg-white'}`}
->
-<span className="text-xl">{ANIMALS.find(a => a.id === p.animal)?.emoji || '❓'}</span>
-<span className="text-stone-800 text-sm font-bold flex-1 text-left">{pName}</span>
-{isOnline(p) && <span className="w-2 h-2 rounded-full bg-green-500 inline-block" />}
-</button>
-);
-})}
-</div>
-<button
-onClick={confirmGift}
-disabled={!giftRecipient || !giftAmount || Number(giftAmount) <= 0 || Number(giftAmount) > user.coins}
-style={{ '--sc': GREEN }}
-className="stamp-btn font-display w-full bg-amber-600 text-white tracking-wide rounded-md py-3 border-2 border-stone-900 disabled:opacity-50"
->
-ПОДАРИТЬ
-</button>
-</div>
-</div>
-);
+function loginView(){
+app.innerHTML=`<h1>🎪 ЗООКЛИКЕР</h1><div class="card">
+<input id="first" placeholder="Имя" maxlength="20"><input id="last" placeholder="Фамилия" maxlength="20">
+<input id="pass" type="password" placeholder="Пароль"><input id="owner" placeholder="Код владельца (не обязательно)">
+<div id="err" class="msg"></div><button style="width:100%" onclick="login()">ВОЙТИ</button>
+<p class="small center">Эта версия сохраняет данные в памяти браузера.</p></div>`}
+function login(){
+ const first=document.getElementById("first").value.trim(),last=document.getElementById("last").value.trim(),pass=document.getElementById("pass").value;
+ if(!first||!last||!pass){document.getElementById("err").textContent="Заполни все поля.";return}
+ const k=(first+" "+last).toLowerCase();let p=db.players[k];
+ if(p&&p.password!==pass){document.getElementById("err").textContent="Неверный пароль.";return}
+ if(!p)p={first,last,password:pass,animal:null,coins:0,total:0,perm:0,rebirths:0,boost:1,boostUntil:0,boostBlockedUntil:0,blockedUntil:0,blockedForever:false,owner:false,ach:{},daily:null,dailyEver:false};
+ if(document.getElementById("owner").value.trim().toUpperCase()===OWNER_CODE)p.owner=true;
+ p.lastSeen=Date.now();db.players[k]=p;save();me=p;view=p.animal==null?"animal":"game";render()
+
+ renderAnnouncements();
 }
+function animalView(){
+app.innerHTML=`<h1>🦁 ВЫБЕРИ ЖИВОТНОЕ</h1><div class="card">${ANIMALS.map((x,i)=>`<button style="width:30%;margin:1%" onclick="choose(${i})">${x}</button>`).join("")}</div>`}
+function choose(i){me.animal=i;db.players[(me.first+" "+me.last).toLowerCase()]=me;save();view="game";render()}
 
-if (screen === 'events') {
-const active = gameState.activeEvent && gameState.activeEvent.expiresAt > Date.now() ? gameState.activeEvent : null;
-const evRemaining = active ? Math.max(0, active.expiresAt - Date.now()) : 0;
-const evMM = Math.floor(evRemaining / 60000);
-const evSS = Math.floor((evRemaining % 60000) / 1000);
-return (
-<div className="min-h-screen w-full paper-bg p-4">
-<style>{GLOBAL_STYLE}</style>
-<button onClick={() => setScreen('game')} className="font-body text-stone-600 text-sm underline mb-4">← Назад</button>
-<h2 className="font-display text-2xl text-green-900 mb-4 tracking-wide text-center">🎉 СОБЫТИЯ</h2>
-
-{active && (
-<div className="pulse-glow bg-white border-2 border-amber-600 rounded-xl p-4 mb-4 text-center max-w-sm mx-auto">
-<div className="font-display text-lg text-stone-800">{EVENTS[active.type].emoji} {EVENTS[active.type].label}</div>
-<div className="font-body text-sm text-stone-500">x{active.mult} — ещё {evMM}:{evSS.toString().padStart(2, '0')}</div>
+function gameView(){
+check(me);save();const l=level(me),next=levelNext(l),start=levelStart(l),pct=next?Math.min(100,Math.max(0,(me.total-start)/(next-start)*100)):100;
+const gb=db.global.until>Date.now();
+app.innerHTML=`<h1>🦁 ЗООКЛИКЕР</h1>
+<div class="card"><div class="coins">🪙 ${fmt(me.coins)}</div>
+<div class="center"><span class="badge">⭐ Уровень ${l}/100</span><span class="badge">⚡ x${totalBoost(me)}</span>${gb?`<span class="badge">🌍 x${db.global.boost}</span>`:""}</div>
+<div class="bar"><i style="width:${pct}%"></i></div><p class="small center">${next?`До уровня ${l+1}: ${fmt(Math.max(0,next-me.total))} накопленных коинов`:"🏆 Максимальный уровень"}</p>
+<button class="animal" onclick="clicker()">${ANIMALS[me.animal]}</button>
+<div id="msg" class="msg"></div></div>
+<div class="row"><button onclick="view='ach';render()">🏆 Достижения</button><button onclick="daily()">🎁 Ежедневная</button></div>
+${me.owner?`<button class="dark" style="width:100%;margin-top:8px" onclick="view='admin';render()">👑 АДМИН-ПАНЕЛЬ</button>`:""}
+<div class="card"><h3>⚡ Бусты</h3>
+<div class="row">
+${(()=>{const mult=me.total>=1000?10:1,c2=200*mult,c5=1000*mult;return `
+<button class="${me.coins>=c2?'affordable-cost':'disabled-cost'}" ${me.coins<c2?'disabled':''} onclick="temp(2,5,${c2})">x2<br><small>${fmt(c2)} · 5 мин</small></button>
+<button class="${me.coins>=c5?'affordable-cost':'disabled-cost'}" ${me.coins<c5?'disabled':''} onclick="temp(5,10,${c5})">x5<br><small>${fmt(c5)} · 10 мин</small></button>`})()}
 </div>
-)}
-
-<div className="max-w-sm mx-auto space-y-3">
-{Object.entries(EVENTS).filter(([key, cfg]) => !cfg.ownerOnly || user.isOwner).map(([key, cfg]) => (
-<button
-key={key}
-onClick={() => startEvent(key)}
-disabled={!!active || (cfg.cost > 0 && user.coins < cfg.cost)}
-style={{ '--sc': GREEN }}
-className="stamp-btn w-full bg-white disabled:opacity-40 rounded-md px-4 py-3 flex items-center justify-between border-2 border-stone-900"
->
-<span className="font-display text-stone-800 text-sm">{cfg.emoji} {cfg.label} · x{cfg.mult} · {cfg.minutes} мин</span>
-<span className="font-body text-xs text-stone-500">{cfg.cost > 0 ? ``${fmt(cfg.cost)} монет` : 'владелец'}</span>
-</button>
-))}
+${(()=>{const c=150*Math.pow(2,me.perm||0)*(me.total>=1000?10:1);return `<button class="${me.coins>=c?'affordable-cost':'disabled-cost'}" ${me.coins<c?'disabled':''} style="width:100%;margin-top:7px" onclick="perm()">Постоянный x${Math.pow(2,(me.perm||0)+1)} · ${fmt(c)} 🪙</button>`})()}
 </div>
-</div>
-);
+${(()=>{const c=50*Math.pow(8,(me.rebirths||0));return `<div class="card"><h3>♻️ Перерождение</h3><button class="${me.coins>=c?'affordable-cost':'disabled-cost'}" ${me.coins<c?'disabled':''} style="width:100%" onclick="rebirth()">Переродиться · ${fmt(c)} 🪙</button><p class="small center">Сбросит коины и даст постоянный бонус.</p></div>`})()}
+<button class="blue" style="width:100%" onclick="logout()">Выйти</button>`}
+function clicker(){
+ if(me.blockedForever||me.blockedUntil>Date.now()){toast("🚫 Ты заблокирован.");return}
+ if(me.boostBlockedUntil>Date.now()){toast("🚫 Бусты запрещены.");return}
+ const g=Math.max(1,Math.round(totalBoost(me)));
+ const paths=[[8,78],[15,70],[22,82],[29,74],[36,86],[43,76],[50,88],[57,72],[64,84],[71,76],[78,87],[85,73],[92,82],[12,90],[25,65],[38,91],[55,68],[68,92],[81,64],[94,70]];
+ const pos=paths[Math.floor(Math.random()*paths.length)];
+ const f=document.createElement("div");
+ f.className="float-coin";f.textContent="+"+fmt(g)+" 🪙";
+ f.style.left=pos[0]+"vw";f.style.top=pos[1]+"vh";
+ document.body.appendChild(f);setTimeout(()=>f.remove(),2900);
+ me.coins+=g;me.total+=g;me.lastSeen=Date.now();check(me);
+ db.players[(me.first+" "+me.last).toLowerCase()]=me;save();render()
 }
-
-if (screen === 'owner') {
-const list = players.filter(p => fullNameOf(p) !== fullNameOf(user));
-return (
-<div className="min-h-screen w-full bg-stone-900 p-4">
-<style>{GLOBAL_STYLE}</style>
-<div className="max-w-md mx-auto">
-<div className="flex items-center justify-between mb-4">
-<div className="flex items-center gap-2 text-amber-500 font-display text-xl tracking-wide">
-<Crown size={22} /> ПАНЕЛЬ ВЛАДЕЛЬЦА
-</div>
-<button onClick={() => setScreen('game')} className="font-body text-stone-400 text-sm underline">
-К игре
-</button>
-</div>
-
-<div className="bg-stone-800 rounded-lg p-4 mb-4 border border-stone-700">
-<div className="flex items-center justify-between">
-<div className="font-body flex items-center gap-2 text-white font-bold text-sm">
-{gameState.blocked ? <Lock size={16} className="text-red-500" /> : <Unlock size={16} className="text-green-500" />}
-{gameState.blocked ? 'Игра заблокирована' : 'Игра открыта'}
-</div>
-<button
-onClick={toggleBlock}
-className={font-body px-4 py-2 rounded-md font-bold text-xs text-white ${gameState.blocked ? 'bg-green-700' : 'bg-red-700'}`}
->
-{gameState.blocked ? 'РАЗБЛОКИРОВАТЬ' : 'ЗАБЛОКИРОВАТЬ'}
-</button>
-</div>
-</div>
-
-<div className="bg-stone-800 rounded-lg p-4 mb-4 border border-stone-700">
-<div className="font-body text-white font-bold text-sm mb-2 flex items-center gap-2">
-<Megaphone size={16} /> Объявление для всех
-</div>
-<div className="flex gap-2">
-<input
-className="font-body flex-1 rounded-md bg-stone-700 text-white px-3 py-2 text-sm focus:outline-none"
-placeholder="Например: скоро ивент"
-value={broadcastInput}
-onChange={e => setBroadcastInput(e.target.value)}
-onKeyDown={e => { if (e.key === 'Enter') sendBroadcast(); }}
-/>
-<button onClick={sendBroadcast} className="font-body bg-amber-600 text-white rounded-md px-4 font-bold text-sm">
-OK
-</button>
-</div>
-</div>
-
-<div className="bg-stone-800 rounded-lg p-4 mb-4 border border-stone-700">
-<button onClick={() => setAbuseOpen(o => !o)} className="font-body text-white font-bold text-sm flex items-center gap-2 w-full">
-<Zap size={16} className="text-amber-400" /> Выдать буст {abuseOpen ? '▲' : '▼'}
-</button>
-{abuseOpen && (
-<div className="mt-3 space-y-2">
-<div className="flex gap-2">
-<input
-type="number"
-placeholder="Множитель"
-value={abuseMult}
-onChange={e => setAbuseMult(e.target.value)}
-className="font-body flex-1 rounded-md bg-stone-700 text-white px-3 py-2 text-sm focus:outline-none"
-/>
-<input
-type="number"
-placeholder="Минут"
-value={abuseMinutes}
-onChange={e => setAbuseMinutes(e.target.value)}
-className="font-body flex-1 rounded-md bg-stone-700 text-white px-3 py-2 text-sm focus:outline-none"
-/>
-</div>
-<div className="flex gap-2">
-<button onClick={handleGrantAll} className="font-body flex-1 bg-red-700 text-white rounded-md py-2 text-sm font-bold">
-Для всех
-</button>
-<button onClick={() => setAbuseTarget(t => t === 'one' ? null : 'one')} className="font-body flex-1 bg-orange-700 text-white rounded-md py-2 text-sm font-bold">
-Для одного игрока
-</button>
-</div>
-{abuseTarget === 'one' && (
-<div className="space-y-1 max-h-40 overflow-y-auto">
-{list.map(p => (
-<button
-key={fullNameOf(p)}
-onClick={() => handleGrantOne(fullNameOf(p))}
-className="font-body w-full text-left bg-stone-700 text-white rounded-md px-3 py-1.5 text-xs flex items-center gap-2"
->
-<span className={w-2 h-2 rounded-full${isOnline(p) ? 'bg-green-500' : 'bg-stone-500'}`} />
-{fullNameOf(p)}
-</button>
-))}
-</div>
-)}
-</div>
-)}
-</div>
-
-<div className="flex items-center justify-between mb-2">
-<div className="font-body text-white font-bold text-sm flex items-center gap-2">
-<Users size={16} /> Игроки ({list.length})
-</div>
-<button onClick={refreshOwnerPanel} className="text-stone-400">
-<RefreshCw size={15} />
-</button>
-</div>
-<div className="space-y-2">
-{list.length === 0 && (
-<div className="font-body text-stone-500 text-sm">В зоопарке пока никого — поделись ссылкой с друзьями.</div>
-)}
-{list.map(p => {
-const pName = fullNameOf(p);
-const pTempActive = p.boostExpiresAt && p.boostExpiresAt > Date.now();
-const pBlockedForever = p.blockedForever;
-const pBlockedTemp = p.blockedUntil && p.blockedUntil > Date.now();
-const pBlockRemainMin = pBlockedTemp ? Math.ceil((p.blockedUntil - Date.now()) / 60000) : 0;
-return (
-<div key={pName} className="bg-stone-800 rounded-lg p-3 border border-stone-700 space-y-2">
-<div className="flex items-center justify-between">
-<div className="font-body text-white font-bold flex items-center gap-2 text-sm">
-<span className={w-2 h-2 rounded-full ${isOnline(p) ? 'bg-green-500' : 'bg-stone-600'}`} />
-<span className="text-xl">{ANIMALS.find(a => a.id === p.animal)?.emoji || '❓'}</span>
-{pName}
-</div>
-<div className="font-display text-amber-500 flex items-center gap-1 text-sm">
-<Coins size={13} /> {fmt(p.coins)}
-</div>
-</div>
-
-{(p.permanentTier > 0 || p.rebirths > 0 || pTempActive || pBlockedForever || pBlockedTemp) && (
-<div className="font-body text-xs flex flex-wrap gap-2">
-{p.rebirths > 0 && <span className="text-purple-400">♻️ x{fmtMult(rebirthMultiplier(p.rebirths))} ({p.rebirths})</span>}
-{p.permanentTier > 0 && <span className="text-amber-400">x{permMultForTier(p.permanentTier)} постоянный</span>}
-{pTempActive && (
-<span className="text-red-400 flex items-center gap-1">
-x{p.boostMultiplier} временный
-<button onClick={() => removeBoost(pName)} className="underline">снять</button>
-</span>
-)}
-{pBlockedForever && <span className="text-red-500">🔒 навсегда</span>}
-{pBlockedTemp && <span className="text-orange-400">🔒 ещё ~{pBlockRemainMin} мин</span>}
-</div>
-)}
-
-<div className="flex items-center gap-1.5">
-<input
-type="number"
-className="font-body w-14 rounded-md bg-stone-700 text-white px-2 py-1 text-xs"
-value={amountInputs[pName] ?? 50}
-onChange={e => setAmountInputs(a => ({ ...a, [pName]: Number(e.target.value) }))}
-/>
-<button onClick={() => adjustCoins(pName, amountInputs[pName] ?? 50)} className="bg-green-700 text-white rounded-md p-1.5">
-<Plus size={13} />
-</button>
-<button onClick={() => adjustCoins(pName, -(amountInputs[pName] ?? 50))} className="bg-red-700 text-white rounded-md p-1.5">
-<Minus size={13} />
-</button>
-<button onClick={() => zeroCoins(pName)} className="font-body bg-stone-600 text-white rounded-md px-2 py-1.5 text-xs">
-0
-</button>
-<button onClick={() => kickPlayer(pName)} className="font-body ml-auto text-stone-400 hover:text-red-400 text-xs flex items-center gap-1 px-1">
-<UserX size={13} /> Кик
-</button>
-</div>
-
-<div className="flex items-center gap-1.5">
-<input
-type="number"
-placeholder="мин"
-className="font-body w-14 rounded-md bg-stone-700 text-white px-2 py-1 text-xs"
-value={blockMinuteInputs[pName] ?? 10}
-onChange={e => setBlockMinuteInputs(a => ({ ...a, [pName]: Number(e.target.value) }))}
-/>
-<button onClick={() => blockTemp(pName)} className="font-body bg-orange-700 text-white rounded-md px-2 py-1.5 text-xs">
-Блок
-</button>
-<button onClick={() => blockForever(pName)} className="font-body bg-red-800 text-white rounded-md px-2 py-1.5 text-xs">
-Навсегда
-</button>
-{(pBlockedForever || pBlockedTemp) && (
-<button onClick={() => unblockPlayer(pName)} className="font-body bg-green-700 text-white rounded-md px-2 py-1.5 text-xs ml-auto">
-Разблок
-</button>
-)}
-</div>
-
-{p.comment && (
-<div className="bg-stone-900 rounded-md p-2">
-<div className="font-body text-xs text-stone-300 flex items-start gap-1">
-<MessageCircle size={12} className="mt-0.5 shrink-0" /> {p.comment}
-</div>
-<div className="flex gap-1.5 mt-1.5">
-<input
-className="font-body flex-1 rounded-md bg-stone-700 text-white px-2 py-1 text-xs focus:outline-none"
-placeholder="Ответить…"
-value={replyInputs[pName] || ''}
-onChange={e => setReplyInputs(r => ({ ...r, [pName]: e.target.value }))}
-onKeyDown={e => { if (e.key === 'Enter') sendReply(pName); }}
-maxLength={200}
-/>
-<button onClick={() => sendReply(pName)} className="bg-amber-600 text-white rounded-md px-2 text-xs">
-ОК
-</button>
-</div>
-{p.ownerReply && <div className="font-body text-xs text-green-400 mt-1">Ты ответил: {p.ownerReply}</div>}
-</div>
-)}
-</div>
-);
-})}
-</div>
-</div>
-</div>
-);
+function temp(mult,min,cost){
+ if(me.boostBlockedUntil>Date.now())return toast("🚫 Бусты запрещены.");
+ if(me.boostUntil>Date.now())return toast("У тебя уже есть временный буст.");
+ const expected=(mult===2?200:1000)*(me.total>=1000?10:1);
+ if(cost!==expected)cost=expected;
+ if(me.coins<cost)return toast("Не хватает коинов.");
+ me.coins-=cost;me.boost=mult;me.boostUntil=Date.now()+min*60000;save();render()
 }
-
-const globalBlock = gameState.blocked && !user.isOwner;
-const personalBlock = isPersonallyBlocked(user);
-const isBlockedNow = globalBlock || personalBlock;
-const activeEv = gameState.activeEvent && gameState.activeEvent.expiresAt > Date.now() ? gameState.activeEvent : null;
-
-return (
-<div className="min-h-screen w-full paper-bg flex flex-col items-center p-4 relative overflow-hidden">
-<style>{GLOBAL_STYLE}</style>
-
-{broadcastToast && (
-<div className="font-body fixed top-4 left-1/2 -translate-x-1/2 bg-stone-900 text-white px-4 py-3 rounded-lg shadow-xl z-50 max-w-xs text-center text-sm font-bold">
-📢 {broadcastToast}
-</div>
-)}
-{replyToast && (
-<div className="font-body fixed top-24 left-1/2 -translate-x-1/2 bg-green-800 text-white px-4 py-3 rounded-lg shadow-xl z-50 max-w-xs text-center text-sm font-bold">
-💬 Владелец ответил: {replyToast}
-</div>
-)}
-
-<div className="w-full max-w-sm flex items-center justify-between mt-2 mb-1">
-<div className="font-body text-stone-800 font-bold flex items-center gap-1 text-sm">
-{user.isOwner && <Crown size={15} className="text-amber-600" />}
-{user.firstName} {user.lastName}
-</div>
-<div className="flex items-center gap-1.5 flex-wrap justify-end">
-<button onClick={() => setScreen('events')} className="bg-white border-2 border-stone-900 text-stone-700 rounded-md p-2">
-<PartyPopper size={15} />
-</button>
-<button onClick={enterGiftScreen} className="bg-white border-2 border-stone-900 text-stone-700 rounded-md p-2">
-<Gift size={15} />
-</button>
-{user.isOwner && (
-<button onClick={enterOwnerPanel} className="bg-stone-900 text-amber-500 rounded-md p-2">
-<Crown size={15} />
-</button>
-)}
-<button onClick={handleLogout} className="bg-white border-2 border-stone-900 text-stone-700 rounded-md p-2">
-<LogOut size={15} />
-</button>
-</div>
-</div>
-<button onClick={() => setScreen('help')} className="font-body text-stone-400 text-xs underline mb-3 flex items-center gap-1">
-<HelpCircle size={12} /> как играть?
-</button>
-
-<div className="bg-amber-600 rounded-full px-6 py-2 mb-3 flex items-center gap-2 border-4 border-stone-900">
-<Coins className="text-white" size={20} />
-<span className="font-display text-2xl text-white tabular-nums">{fmt(user.coins)}</span>
-</div>
-
-{activeEv && (
-<div className={pulse-glow font-body bg-white border-2 border-amber-600 rounded-full px-4 py-1.5 mb-4 flex items-center gap-2 text-sm font-bold text-stone-800${activeEv.type === 'disco' ? 'disco-spin' : ''}`}>
-{EVENTS[activeEv.type].emoji} {EVENTS[activeEv.type].label} x{activeEv.mult}
-</div>
-)}
-
-{isBlockedNow ? (
-<div className="bg-white rounded-xl p-8 text-center max-w-xs border-2 border-stone-900">
-<div className="text-4xl mb-2">🔒</div>
-{personalBlock ? (
-<>
-<div className="font-display text-green-900 text-lg tracking-wide">ТЫ ЗАБЛОКИРОВАН</div>
-<div className="font-body text-stone-500 text-sm mt-1">
-{user.blockedForever ? 'Владелец заблокировал тебя навсегда' : Осталось ${bmm}:${bss.toString().padStart(2, '0')}}
-</div>
-</>
-) : (
-<>
-<div className="font-display text-green-900 text-lg tracking-wide">ИГРА ЗАБЛОКИРОВАНА</div>
-<div className="font-body text-stone-500 text-sm mt-1">Владелец скоро откроет её снова</div>
-</>
-)}
-</div>
-) : (
-<>
-<div className="relative w-56 h-56 flex items-center justify-center">
-<button
-onClick={handleAnimalClick}
-className={w-56 h-56 rounded-full bg-white border-8 border-green-900 flex items-center justify-center transition-transform duration-100 ${isPunching ? 'scale-90' : 'scale-100'}} style={{ boxShadow:0 8px 0 ${GREEN} }}
->
-<div className="w-44 h-44 rounded-full border-4 border-amber-600 flex items-center justify-center bg-amber-50">
-<span className="text-8xl select-none">{animalMeta?.emoji || '🐾'}</span>
-</div>
-</button>
-{ripples.map(r => (
-<div key={r.id} className="ripple absolute top-0 left-0 w-56 h-56 rounded-full border-4 pointer-events-none" style={{ borderColor: GOLD }} />
-))}
-{floaters.map(f => (
-<div key={f.id} className="floater font-display absolute text-2xl pointer-events-none" style={{ color: GOLD, top: '15%', left: '50%' }}>
-{f.text}
-</div>
-))}
-</div>
-
-<button onClick={() => setScreen('animal')} className="font-body text-stone-500 text-xs mt-3 underline">
-сменить животное
-</button>
-
-{totalMult > 1 && (
-<div className="font-body mt-4 bg-red-700 text-white rounded-full px-4 py-1.5 flex items-center gap-2 font-bold text-sm">
-<Zap size={15} /> x{fmtMult(totalMult)} {tempActive ? — ещё ${mm}:${ss.toString().padStart(2, '0')} : ''}
-</div>
-)}
-
-<div className="w-full max-w-sm mt-6">
-<div className="font-body text-xs text-stone-500 font-bold mb-2 tracking-wide flex items-center justify-between">
-<span>ВРЕМЕННЫЕ БУСТЫ</span>
-{(user.totalEarned || 0) >= SCALE_THRESHOLD && <span className="text-red-600">цены выросли</span>}
-</div>
-<div className="space-y-2">
-{TEMP_BOOSTS.map((b, i) => {
-const cost = tempBoostCost(i, user.totalEarned);
-const dis = tempActive || user.coins < cost;
-const sc = i === 0 ? GREEN : i === 1 ? RED : GOLD;
-const iconColor = i === 0 ? 'text-green-800' : i === 1 ? 'text-red-700' : 'text-amber-600';
-return (
-<button
-key={b.mult}
-onClick={() => buyTempBoost(i)}
-disabled={dis}
-style={{ '--sc': sc }}
-className="stamp-btn w-full bg-white disabled:opacity-40 rounded-md px-4 py-2.5 flex items-center justify-between border-2 border-stone-900"
->
-<span className="font-display text-stone-800 text-sm flex items-center gap-2">
-<Zap size={16} className={iconColor} /> x{b.mult} на {b.minutes} мин
-</span>
-<span className="font-body text-xs text-stone-500">{fmt(cost)} монет</span>
-</button>
-);
-})}
-</div>
-</div>
-
-<div className="w-full max-w-sm mt-4">
-<div className="font-body text-xs text-stone-500 font-bold mb-2 tracking-wide">ПОСТОЯННЫЙ БУСТ</div>
-<button
-onClick={buyPermanentBoost}
-disabled={user.coins < nextPermCost(user.permanentTier || 0)}
-style={{ '--sc': GOLD }}
-className="stamp-btn w-full bg-amber-50 disabled:opacity-40 rounded-md px-4 py-3 flex items-center justify-between border-2 border-stone-900"
->
-<span className="font-display text-stone-800 text-sm">x{nextPermMult(user.permanentTier || 0)} НАВСЕГДА</span>
-<span className="font-body text-xs text-stone-500">{fmt(nextPermCost(user.permanentTier || 0))} монет</span>
-</button>
-{user.permanentTier > 0 && (
-<div className="font-body text-xs text-stone-500 mt-1 text-center">сейчас: x{permMult}</div>
-)}
-</div>
-
-<div className="w-full max-w-sm mt-4 mb-6">
-<div className="font-body text-xs text-stone-500 font-bold mb-2 tracking-wide">ПЕРЕРОЖДЕНИЕ</div>
-{(user.rebirths || 0) >= REBIRTH_MAX ? (
-<div className="font-body text-xs text-stone-500 text-center bg-white border-2 border-stone-900 rounded-md py-3">
-Достигнут максимум — 100 перерождений
-</div>
-) : (
-<button
-onClick={handleRebirth}
-disabled={user.coins < rebirthCostFor((user.rebirths || 0) + 1)}
-style={{ '--sc': RED }}
-className="stamp-btn w-full bg-white disabled:opacity-40 rounded-md px-4 py-3 flex items-center justify-between border-2 border-stone-900"
->
-<span className="font-display text-stone-800 text-sm flex items-center gap-2">
-<Repeat size={16} className="text-red-700" /> Переродиться → x{fmtMult(rebirthMultiplier((user.rebirths || 0) + 1))}
-</span>
-<span className="font-body text-xs text-stone-500">{fmt(rebirthCostFor((user.rebirths || 0) + 1))} монет</span>
-</button>
-)}
-{(user.rebirths || 0) > 0 && (
-<div className="font-body text-xs text-stone-500 mt-1 text-center">
-сейчас: x{fmtMult(rebirthMultiplier(user.rebirths))} ({user.rebirths}/{REBIRTH_MAX})
-</div>
-)}
-<div className="font-body text-xs text-stone-400 mt-1 text-center">обнуляет монеты, буст и постоянный буст сохраняются</div>
-</div>
-</>
-)}
-</div>
-);
-function achievementsView(){
- const u=state.user;awardAchievements(u);
- return `<main class="page"><button class="back" onclick="state.screen='game';render()">← Назад</button><h2 class="center-text">🏆 ДОСТИЖЕНИЯ</h2><div class="narrow ach-grid">${ACHIEVEMENTS.map(([id,name,check])=>{const done=!!u.achievements?.[id];return `<div class="ach ${done?"done":""}"><b>${done?"✅":"🔒"} ${name}</b><small>${done?"Открыто":"Выполни условие, чтобы открыть"}</small></div>`}).join("")}</div></main>`;
+function perm(){const c=150*Math.pow(2,me.perm||0)*(me.total>=1000?10:1);if(me.coins<c)return toast("Не хватает коинов.");me.coins-=c;me.perm=(me.perm||0)+1;save();render()}
+function rebirth(){
+ const c=50*Math.pow(8,me.rebirths||0);
+ if(me.coins<c){toast("Не хватает коинов.");return}
+ me.coins=0;
+ me.rebirths=(me.rebirths||0)+1;
+ check(me);
+ save();
+ render();
+ toast("♻️ Перерождение выполнено!");
 }
+function daily(){if(me.daily===today())return toast("🎁 Сегодня уже получено.");const r=100+level(me)*50;me.coins+=r;me.total+=r;me.daily=today();me.dailyEver=true;check(me);save();render();toast("🎁 +"+fmt(r))}
+function achView(){app.innerHTML=`<h1>🏆 ДОСТИЖЕНИЯ</h1><div class="card">${ACH.map(([id,n])=>`<div class="player"><b>${me.ach?.[id]?"✅":"🔒"} ${n}</b><div class="small">${me.ach?.[id]?"Открыто":"Ещё не открыто"}</div></div>`).join("")}</div><button style="width:100%" onclick="view='game';render()">← Назад</button>`}
+
+function adminView(){
+if(!me.owner){view="game";return render()}
+const arr=Object.values(db.players).filter(p=>p!==me);
+app.innerHTML=`<h1>👑 АДМИН-ПАНЕЛЬ</h1>
+<div class="card"><h3>🌍 Буст всем</h3><div class="row"><input id="gx" type="number" value="100"><input id="gm" type="number" value="10"></div><button style="width:100%" onclick="globalBoost()">⚡ ВКЛЮЧИТЬ ВСЕМ</button><button class="danger" style="width:100%;margin-top:6px" onclick="globalOff()">❌ УБРАТЬ</button></div>
+<div class="card"><h3>👥 Игроки (${arr.length})</h3>${arr.length?arr.map(p=>playerAdmin(p)).join(""):`<p class="small center">Игроков пока нет.</p>`}</div>
+<button class="blue" style="width:100%" onclick="view='game';render()">← К игре</button><div id="msg" class="msg"></div>`}
+function playerAdmin(p){
+ const k=(p.first+" "+p.last).toLowerCase(),id="a_"+btoa(unescape(encodeURIComponent(k))).replace(/=/g,"");
+ return `<div class="player"><b>${esc(name(p))}</b><br>🪙 ${fmt(p.coins)} · ⭐ ${level(p)} · ⚡ x${totalBoost(p)}
+<div class="row"><input id="${id}" type="number" value="100"><button class="danger" onclick="removeCoins('${esc(k)}','${id}')">🗑️ Удалить</button></div>
+<div class="row"><button onclick="addCoins('${esc(k)}','${id}')">➕ Дать</button><button onclick="zero('${esc(k)}')">0 Обнулить</button></div>
+<div class="row"><input id="${id}x" type="number" value="100"><input id="${id}m" type="number" value="10"></div>
+<button style="width:100%" onclick="giveBoost('${esc(k)}','${id}')">⚡ Выдать буст</button>
+<button class="danger" style="width:100%;margin-top:5px" onclick="blockBoost('${esc(k)}','${id}m')">🚫 Запретить буст на время</button>
+<button class="green" style="width:100%;margin-top:5px" onclick="unblockBoost('${esc(k)}')">✅ Разрешить буст</button>
+<div class="row" style="margin-top:5px"><button onclick="blockPlayer('${esc(k)}','${id}m')">🚫 Блок</button><button onclick="unblockPlayer('${esc(k)}')">Разблокировать</button></div></div>`}
+function pget(k){return db.players[k]}
+function removeCoins(k,id){let p=pget(k),n=Math.max(0,Math.floor(Number(document.getElementById(id).value)||0));if(!p||!n)return;p.coins=Math.max(0,p.coins-n);save();render()}
+function addCoins(k,id){let p=pget(k),n=Math.max(0,Math.floor(Number(document.getElementById(id).value)||0));if(!p||!n)return;p.coins+=n;p.total+=n;check(p);save();render()}
+function zero(k){if(db.players[k]){db.players[k].coins=0;save();render()}}
+function giveBoost(k,id){let p=pget(k),x=Math.max(1,Number(document.getElementById(id+"x").value)||1),m=Math.max(1,Number(document.getElementById(id+"m").value)||10);if(!p)return;p.boost=x;p.boostUntil=Date.now()+m*60000;save();render()}
+function blockBoost(k,id){let p=pget(k),m=Math.max(1,Number(document.getElementById(id).value)||10);if(!p)return;p.boost=1;p.boostUntil=0;p.boostBlockedUntil=Date.now()+m*60000;save();render()}
+function unblockBoost(k){if(db.players[k]){db.players[k].boostBlockedUntil=0;save();render()}}
+function blockPlayer(k,id){let p=pget(k),m=Math.max(1,Number(document.getElementById(id).value)||10);if(!p)return;p.blockedUntil=Date.now()+m*60000;save();render()}
+function unblockPlayer(k){if(db.players[k]){db.players[k].blockedUntil=0;p=0;save();render()}}
+function globalBoost(){let x=Math.max(1,Number(document.getElementById("gx").value)||100),m=Math.max(1,Number(document.getElementById("gm").value)||10);db.global={boost:x,until:Date.now()+m*60000};save();render()}
+function globalOff(){db.global={boost:1,until:0};save();render()}
+function logout(){me=null;view="login";render()}
+render();
+</script>
+
+<div class="card"><h3>📣 Сообщение всем</h3>
+<p class="small">Одно сообщение стоит <b>1 000 000 000 🪙</b>.</p>
+<div class="announce-form"><input id="announcementInput" maxlength="180" placeholder="Напиши сообщение..."><button onclick="sendAnnouncement()">Отправить всем</button></div>
+</div>
+<div class="card"><h3>🎙️ Объявление владельца</h3>
+<p class="small">Только владелец. Показывается всем игрокам.</p>
+<div class="announce-form"><input id="ownerAnnouncementInput" maxlength="180" placeholder="Например: Привет, сейчас будет ивент!"><button onclick="ownerAnnouncement()">Объявить всем</button></div>
+</div>
+<script type="module">
+import { connect } from "https://esm.sh/itty-sockets@1.0.0";
+
+const ZOO_CHANNEL="zoo-clicker-public-v1";
+let zooSocket=null;
+const zooOnline=new Map();
+const zooUID=crypto.randomUUID ? crypto.randomUUID() : ("z_"+Date.now()+"_"+Math.random().toString(36).slice(2));
+
+function zooPlayerName(){
+  return (window.me && ((window.me.first||"")+" "+(window.me.last||"")).trim()) || "Игрок";
 }
+function zooRenderOnline(){
+  const names=[...zooOnline.values()].filter(p=>Date.now()-p.at<10000);
+  const c=document.getElementById("onlineCount"), box=document.getElementById("onlinePlayers");
+  if(c)c.textContent=String(names.length);
+  if(box){
+    box.innerHTML="";
+    names.forEach(p=>{
+      const e=document.createElement("div");e.className="online-player";
+      e.textContent="🟢 "+p.name;
+      box.appendChild(e);
+    });
+  }
+}
+function zooBroadcast(type,data){
+  if(zooSocket)zooSocket.send({type,data});
+}
+function zooRealtimeStart(){
+  try{
+    zooSocket=connect(ZOO_CHANNEL,{as:zooPlayerName(),announce:true});
+    zooSocket.on("message",({message,uid,alias})=>{
+      if(!message)return;
+      if(message.type==="presence"){
+        if(uid===zooUID)return;
+        zooOnline.set(uid,{name:message.data?.name||alias||"Игрок",at:Date.now()});
+        zooRenderOnline();
+        return;
+      }
+      if(message.type==="leave"){
+        if(uid!==zooUID){zooOnline.delete(uid);zooRenderOnline();}
+        return;
+      }
+      if(message.type==="global"){
+        const g=message.data;
+        if(g){db.global=g;render();}
+        return;
+      }
+      if(message.type==="announcement"){
+        const a=message.data;
+        if(a){
+          db.announcements=db.announcements||[];
+          const last=db.announcements[db.announcements.length-1];
+          if(!last||last.at!==a.at){
+            db.announcements.push(a);
+            if(db.announcements.length>20)db.announcements.shift();
+            localStorage.setItem(STORE,JSON.stringify(db));
+            showAnnouncement(a.name,a.text,!!a.owner);
+          }
+        }
+        return;
+      }
+    });
+    // Announce ourselves and refresh presence.
+    const hello=()=>zooBroadcast("presence",{name:zooPlayerName()});
+    hello(); setInterval(hello,3000); setInterval(zooRenderOnline,2000);
+  }catch(e){console.warn("Realtime unavailable",e);}
+}
+window.zooBroadcast=zooBroadcast;
+window.zooRealtimeStart=zooRealtimeStart;
+window.addEventListener("load",()=>setTimeout(zooRealtimeStart,500));
+</script>
+</body></html>
