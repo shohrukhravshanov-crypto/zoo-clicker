@@ -101,6 +101,24 @@ background-size:auto,auto,42px 42px,42px 42px;pointer-events:none}
 
 <script>
 const logEl=document.getElementById('log'), statusEl=document.getElementById('status'), modeEl=document.getElementById('mode'), mic=document.getElementById('mic');
+const commandInput=document.getElementById('commandInput');
+const sendCommand=document.getElementById('sendCommand');
+
+function sendTextCommand(){
+  const text=commandInput.value.trim();
+  if(!text)return;
+  commandInput.value='';
+  execute(text);
+  commandInput.focus();
+}
+
+sendCommand.onclick=sendTextCommand;
+commandInput.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){
+    e.preventDefault();
+    sendTextCommand();
+  }
+});
 const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
 let recognition=null;
 const micModal=document.getElementById('micModal');
