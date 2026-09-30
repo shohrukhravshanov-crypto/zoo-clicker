@@ -66,7 +66,7 @@ background-size:auto,auto,42px 42px,42px 42px;pointer-events:none}
     <div class="modalTitle">ЗАПУСК JARVIS</div>
     <div class="modalText">Выберите способ управления JARVIS.</div>
     <button id="allowMic" class="allowBtn">РАЗРЕШИТЬ МИКРОФОН</button>
-    <button id="skipMic" class="skipBtn">▶ ПРОДОЛЖИТЬ БЕЗ МИКРОФОНА</button>
+    <button id="skipMic" class="skipBtn" type="button" onclick="document.getElementById('micModal').style.display='none';document.body.classList.remove('startup');document.getElementById('status').textContent='TEXT MODE';document.getElementById('mode').textContent='TEXT READY';">▶ ПРОДОЛЖИТЬ БЕЗ МИКРОФОНА</button>
     <div id="micHint" class="micHint">Микрофон не обязателен. Можно сразу продолжить без него.</div>
   </div>
 </div>
