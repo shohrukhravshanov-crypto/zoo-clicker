@@ -40,6 +40,7 @@ background-size:auto,auto,42px 42px,42px 42px;pointer-events:none}
 @keyframes spin{to{transform:rotate(360deg)}} @keyframes pulse{50%{transform:scale(1.08);filter:brightness(1.25)}}
 @media(max-width:600px){.app{padding:14px}.brand{font-size:20px;letter-spacing:5px}.panel{bottom:83px}.reactor{width:75vw;height:75vw}.mic{width:64px;height:64px}}
 
+#skipStart:checked ~ .app #micModal{display:none!important}
 .modal{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:22px;background:rgba(0,4,10,.88);backdrop-filter:blur(14px)}
 .modalBox{width:min(430px,100%);padding:30px 24px;border:1px solid rgba(61,225,255,.5);border-radius:22px;background:linear-gradient(145deg,rgba(5,25,38,.98),rgba(2,10,18,.98));box-shadow:0 0 55px rgba(0,210,255,.18);text-align:center}
 .modalIcon{font-size:48px;margin-bottom:12px;filter:drop-shadow(0 0 12px #00d9ff)}
@@ -59,6 +60,7 @@ background-size:auto,auto,42px 42px,42px 42px;pointer-events:none}
 </style>
 </head>
 <body>
+<input type="checkbox" id="skipStart" hidden>
 <div class="app">
   <div id="micModal" class="modal">
   <div class="modalBox">
@@ -66,7 +68,7 @@ background-size:auto,auto,42px 42px,42px 42px;pointer-events:none}
     <div class="modalTitle">ЗАПУСК JARVIS</div>
     <div class="modalText">Выберите способ управления JARVIS.</div>
     <button id="allowMic" class="allowBtn">РАЗРЕШИТЬ МИКРОФОН</button>
-    <button id="skipMic" class="skipBtn" type="button" onclick="document.getElementById('micModal').style.display='none';document.body.classList.remove('startup');document.getElementById('status').textContent='TEXT MODE';document.getElementById('mode').textContent='TEXT READY';">▶ ПРОДОЛЖИТЬ БЕЗ МИКРОФОНА</button>
+    <label for="skipStart" id="skipMic" class="skipBtn">▶ ПРОДОЛЖИТЬ БЕЗ МИКРОФОНА</label>
     <div id="micHint" class="micHint">Микрофон не обязателен. Можно сразу продолжить без него.</div>
   </div>
 </div>
@@ -263,13 +265,12 @@ allowMic.onclick=async()=>{
   }
 };
 
-skipMic.onclick=()=>{
-  micModal.style.display='none';
+skipMic.addEventListener('click',()=>{
   document.body.classList.remove('startup');
   statusEl.textContent='TEXT MODE';
   modeEl.textContent='TEXT READY';
   log('JARVIS','Микрофон пропущен. Пишите команды в поле снизу.');
-};
+});
 micModal.style.display='flex';
 document.body.classList.add('startup');
 
