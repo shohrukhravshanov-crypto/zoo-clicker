@@ -47,6 +47,8 @@ background-size:auto,auto,42px 42px,42px 42px;pointer-events:none}
 .modalText{margin:14px 0 22px;color:#8fc4ce;font-size:14px;line-height:1.55}
 .allowBtn{width:100%;height:50px;border:1px solid #46eaff;border-radius:25px;background:rgba(0,190,235,.16);color:#dfffff;font-weight:700;letter-spacing:1px;cursor:pointer;box-shadow:0 0 18px rgba(0,220,255,.18)}
 .allowBtn:active{transform:scale(.98)}
+.skipBtn{width:100%;height:44px;margin-top:10px;border:1px solid rgba(120,190,205,.25);border-radius:22px;background:rgba(20,45,55,.35);color:#9ec4cb;font-weight:600;letter-spacing:.7px;cursor:pointer}
+.skipBtn:active{transform:scale(.98);background:rgba(40,80,90,.45)}
 .micHint{min-height:18px;margin-top:12px;font-size:11px;color:#6e9da7}
 
 .textCommand{position:absolute;left:18px;right:18px;bottom:48px;max-width:560px;margin:auto;display:flex;gap:7px;z-index:4}
@@ -64,7 +66,8 @@ background-size:auto,auto,42px 42px,42px 42px;pointer-events:none}
     <div class="modalTitle">Доступ к микрофону</div>
     <div class="modalText">JARVIS использует микрофон, чтобы слышать ваши голосовые команды.</div>
     <button id="allowMic" class="allowBtn">РАЗРЕШИТЬ МИКРОФОН</button>
-    <div id="micHint" class="micHint">Нажмите кнопку, чтобы продолжить.</div>
+    <button id="skipMic" class="skipBtn">ПРОДОЛЖИТЬ БЕЗ МИКРОФОНА</button>
+    <div id="micHint" class="micHint">Можно продолжить без микрофона и писать команды вручную.</div>
   </div>
 </div>
   <div class="top">
@@ -101,6 +104,7 @@ let recognition=null;
 const micModal=document.getElementById('micModal');
 const allowMic=document.getElementById('allowMic');
 const micHint=document.getElementById('micHint');
+const skipMic=document.getElementById('skipMic');
 
 async function requestMicrophone(){
   if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
@@ -259,6 +263,12 @@ allowMic.onclick=async()=>{
   }
 };
 
+skipMic.onclick=()=>{
+  micModal.style.display='none';
+  statusEl.textContent='TEXT MODE';
+  modeEl.textContent='TEXT READY';
+  log('JARVIS','Микрофон пропущен. Пишите команды в поле снизу.');
+};
 micModal.style.display='flex';
 
 document.getElementById('help').onclick=()=>{
