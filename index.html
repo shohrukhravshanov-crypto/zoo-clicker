@@ -58,6 +58,15 @@ background-size:auto,auto,42px 42px,42px 42px;pointer-events:none}
 </head>
 <body>
 <div class="app">
+  <div id="micModal" class="modal">
+  <div class="modalBox">
+    <div class="modalIcon">🎙️</div>
+    <div class="modalTitle">Доступ к микрофону</div>
+    <div class="modalText">JARVIS использует микрофон, чтобы слышать ваши голосовые команды.</div>
+    <button id="allowMic" class="allowBtn">РАЗРЕШИТЬ МИКРОФОН</button>
+    <div id="micHint" class="micHint">Нажмите кнопку, чтобы продолжить.</div>
+  </div>
+</div>
   <div class="top">
     <div class="brand">JARVIS</div>
     <div class="status"><span class="dot"></span><span id="status">ONLINE</span></div>
@@ -215,20 +224,48 @@ mic.onclick=()=>{
   try{recognition.start()}catch(e){}
 };
 document.getElementById('clear').onclick=()=>{logEl.innerHTML='<b>JARVIS:</b> Журнал очищен.'};
+
+// Запрос микрофона: элементы уже существуют, потому что модальное окно находится в DOM до этого скрипта.
+const micModal=document.getElementById('micModal');
+const allowMic=document.getElementById('allowMic');
+const micHint=document.getElementById('micHint');
+
+async function requestMicrophone(){
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    micHint.textContent='Этот предпросмотр не даёт доступ к микрофону. Откройте GitHub Pages в Chrome.';
+    return false;
+  }
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    stream.getTracks().forEach(track=>track.stop());
+    micHint.textContent='Микрофон разрешён. Запускаю JARVIS...';
+    statusEl.textContent='MIC READY';
+    setTimeout(()=>micModal.style.display='none',500);
+    return true;
+  }catch(error){
+    micHint.textContent='Доступ не получен. Проверьте разрешение «Микрофон» для этого сайта в Chrome.';
+    statusEl.textContent='MIC BLOCKED';
+    return false;
+  }
+}
+
+allowMic.onclick=async()=>{
+  allowMic.disabled=true;
+  allowMic.textContent='ЗАПРАШИВАЮ ДОСТУП...';
+  const ok=await requestMicrophone();
+  if(!ok){
+    allowMic.disabled=false;
+    allowMic.textContent='ПОПРОБОВАТЬ СНОВА';
+  }
+};
+
+micModal.style.display='flex';
+
 document.getElementById('help').onclick=()=>{
   const text='Доступные команды: открой YouTube, открой Google, открой GitHub, открой Telegram, найди что-нибудь, который час, посчитай выражение, полный экран, запомни текст, что ты запомнил.';
   log('JARVIS',text);speak(text);
 };
 </script>
 
-<div id="micModal" class="modal">
-  <div class="modalBox">
-    <div class="modalIcon">🎙️</div>
-    <div class="modalTitle">Доступ к микрофону</div>
-    <div class="modalText">JARVIS использует микрофон, чтобы слышать ваши голосовые команды.</div>
-    <button id="allowMic" class="allowBtn">РАЗРЕШИТЬ МИКРОФОН</button>
-    <div id="micHint" class="micHint">Нажмите кнопку, чтобы продолжить.</div>
-  </div>
-</div>
 </body>
 </html>
