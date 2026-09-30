@@ -1,310 +1,234 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Zoo Clicker</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>JARVIS — AI Assistant</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#fffbeb;color:#29251f;font-family:Arial,sans-serif}
-.wrap{max-width:520px;margin:auto;padding:16px;min-height:100vh}
-.card{background:#fff;border:2px solid #29251f;border-radius:14px;padding:16px;margin:12px 0}
-h1,h2,h3{text-align:center}.center{text-align:center}.coins{font-size:34px;font-weight:900;text-align:center}
-input,button{font:inherit;border:2px solid #29251f;border-radius:9px;padding:10px}input{width:100%;margin:4px 0}button{background:#f4c84a;font-weight:800;cursor:pointer}button:active{transform:translateY(1px)}
-button.disabled-cost{opacity:.45;filter:grayscale(.35);cursor:not-allowed}
-button.affordable-cost{opacity:1;background:rgba(244,200,74,.18)}
-.row{display:flex;gap:7px}.row>*{flex:1}.animal{display:block;width:220px;height:220px;border-radius:50%;font-size:110px;margin:18px auto;background:#d9f0c7;box-shadow:5px 5px 0 #29251f}
-.badge{display:inline-block;padding:5px 8px;border-radius:20px;background:#eee5cf;margin:3px;font-weight:700}
-.bar{height:12px;background:#ddd;border-radius:10px;overflow:hidden;border:1px solid #29251f}.bar i{display:block;height:100%;background:#64a653}
-.danger{background:#ef9a9a}.green{background:#9dd49a}.blue{background:#a8d8f0}.dark{background:#29251f;color:#fff}
-.player{border:1px solid #bbb;padding:10px;border-radius:9px;margin:8px 0}.small{font-size:12px;color:#70695f}
-.hidden{display:none}.msg{text-align:center;font-weight:700;min-height:22px}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:Arial,Helvetica,sans-serif;background:#02070d;color:#dff8ff}
+body{display:flex;align-items:center;justify-content:center}
+body:before{content:"";position:fixed;inset:0;background:
+radial-gradient(circle at 50% 43%,rgba(0,210,255,.12),transparent 24%),
+radial-gradient(circle at 50% 43%,rgba(0,110,255,.08),transparent 48%),
+linear-gradient(rgba(0,190,255,.025) 1px,transparent 1px),
+linear-gradient(90deg,rgba(0,190,255,.025) 1px,transparent 1px);
+background-size:auto,auto,42px 42px,42px 42px;pointer-events:none}
+.app{position:relative;width:100%;height:100%;max-width:1100px;padding:18px;display:flex;flex-direction:column}
+.top{display:flex;align-items:center;justify-content:space-between;z-index:2}
+.brand{letter-spacing:7px;font-weight:700;font-size:25px;text-shadow:0 0 18px #00d9ff}
+.status{font-size:12px;letter-spacing:2px;color:#65eaff;display:flex;gap:8px;align-items:center}
+.dot{width:8px;height:8px;border-radius:50%;background:#42eaff;box-shadow:0 0 12px #42eaff}
+.main{flex:1;display:flex;align-items:center;justify-content:center;position:relative}
+.reactor{width:min(62vw,390px);height:min(62vw,390px);position:relative;display:flex;align-items:center;justify-content:center}
+.ring{position:absolute;border:1px solid rgba(53,222,255,.45);border-radius:50%;box-shadow:0 0 25px rgba(0,196,255,.08),inset 0 0 25px rgba(0,196,255,.06)}
+.r1{inset:2%;animation:spin 14s linear infinite}
+.r2{inset:9%;border-style:dashed;animation:spin 20s linear infinite reverse}
+.r3{inset:18%;border-color:rgba(72,235,255,.65);animation:spin 9s linear infinite}
+.r4{inset:29%;border-width:2px;box-shadow:0 0 40px rgba(0,220,255,.25),inset 0 0 35px rgba(0,220,255,.15)}
+.core{width:30%;height:30%;border-radius:50%;background:radial-gradient(circle,#fff 0%,#9df7ff 12%,#00d9ff 32%,#006a9a 56%,transparent 72%);box-shadow:0 0 35px #00e5ff,0 0 90px rgba(0,196,255,.5);animation:pulse 2s ease-in-out infinite}
+.tick{position:absolute;width:100%;height:100%;border-radius:50%;border-top:2px solid #00eaff;animation:spin 4s linear infinite}
+.innerText{position:absolute;bottom:3%;font-size:11px;letter-spacing:3px;color:#66eaff}
+.panel{position:absolute;left:18px;right:18px;bottom:88px;max-width:650px;margin:auto;background:rgba(2,13,22,.78);border:1px solid rgba(58,218,255,.28);border-radius:15px;padding:12px 15px;backdrop-filter:blur(10px);z-index:3}
+.log{height:48px;overflow:auto;font-size:13px;color:#a8dce8;line-height:1.45}
+.log b{color:#55eaff}
+.controls{display:flex;gap:12px;align-items:center;justify-content:center;z-index:4}
+.mic{width:70px;height:70px;border-radius:50%;border:1px solid #43eaff;background:rgba(0,160,210,.12);color:#bffaff;font-size:27px;box-shadow:0 0 20px rgba(0,220,255,.2);cursor:pointer;transition:.2s}
+.mic:active,.mic.listening{transform:scale(.94);background:rgba(0,220,255,.28);box-shadow:0 0 45px rgba(0,220,255,.55)}
+.help{height:44px;padding:0 18px;border-radius:22px;border:1px solid rgba(75,220,255,.35);background:rgba(0,80,110,.14);color:#bdeff7;cursor:pointer}
+.bottom{position:absolute;bottom:12px;left:0;right:0;text-align:center;font-size:10px;letter-spacing:2px;color:#4c7f89}
+@keyframes spin{to{transform:rotate(360deg)}} @keyframes pulse{50%{transform:scale(1.08);filter:brightness(1.25)}}
+@media(max-width:600px){.app{padding:14px}.brand{font-size:20px;letter-spacing:5px}.panel{bottom:83px}.reactor{width:75vw;height:75vw}.mic{width:64px;height:64px}}
 
-.announcement{position:fixed;left:50%;top:18px;transform:translateX(-50%);z-index:10000;width:min(92vw,720px);background:#fff!important;color:#000!important;border:1px solid #ddd;border-radius:16px;padding:12px 16px;box-shadow:0 10px 30px rgba(0,0,0,.25);display:none}
-.announcement.show{display:block;animation:announceIn .35s ease-out}
-.announcement .who{font-weight:900;color:#000!important;margin-bottom:4px}
-.announcement .text{font-size:16px;line-height:1.35;color:#000!important;overflow-wrap:anywhere}
-.announce-form{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
-.announce-form input{flex:1;min-width:180px}
-@keyframes announceIn{from{opacity:0;transform:translate(-50%,-12px)}to{opacity:1;transform:translate(-50%,0)}}
-.float-coin{position:fixed;z-index:99999;pointer-events:none;font-size:25px;font-weight:900;transform:translate(-50%,0);text-shadow:2px 2px 0 #fff;animation:coinFly 2.8s ease-out forwards}
-@keyframes coinFly{0%{opacity:0;transform:translate(-50%,10px) scale(.7)}10%{opacity:1;transform:translate(-50%,0) scale(1.12)}82%{opacity:1}100%{opacity:0;transform:translate(-50%,-92vh) scale(.95)}}
-12%{opacity:1;transform:translate(-50%,0) scale(1.15)}100%{opacity:0;transform:translate(-50%,-75vh) scale(1)}}
+.modal{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:22px;background:rgba(0,4,10,.88);backdrop-filter:blur(14px)}
+.modalBox{width:min(430px,100%);padding:30px 24px;border:1px solid rgba(61,225,255,.5);border-radius:22px;background:linear-gradient(145deg,rgba(5,25,38,.98),rgba(2,10,18,.98));box-shadow:0 0 55px rgba(0,210,255,.18);text-align:center}
+.modalIcon{font-size:48px;margin-bottom:12px;filter:drop-shadow(0 0 12px #00d9ff)}
+.modalTitle{font-size:21px;font-weight:700;letter-spacing:2px;color:#dffbff}
+.modalText{margin:14px 0 22px;color:#8fc4ce;font-size:14px;line-height:1.55}
+.allowBtn{width:100%;height:50px;border:1px solid #46eaff;border-radius:25px;background:rgba(0,190,235,.16);color:#dfffff;font-weight:700;letter-spacing:1px;cursor:pointer;box-shadow:0 0 18px rgba(0,220,255,.18)}
+.allowBtn:active{transform:scale(.98)}
+.micHint{min-height:18px;margin-top:12px;font-size:11px;color:#6e9da7}
 
-.online-panel{margin:10px 0;padding:10px 12px;border:1px solid #ddd;border-radius:14px;background:#fff;color:#000}
-.online-title{font-weight:900}.online-players{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
-.online-player{padding:5px 9px;border-radius:999px;background:#f1f1f1;color:#000;font-size:13px}
+.textCommand{position:absolute;left:18px;right:18px;bottom:48px;max-width:560px;margin:auto;display:flex;gap:7px;z-index:4}
+.textCommand input{flex:1;height:40px;border:1px solid rgba(61,220,255,.28);border-radius:20px;padding:0 15px;background:rgba(2,15,25,.7);color:#dffcff;outline:none}
+.textCommand input::placeholder{color:#668d96}
+.textCommand button{width:42px;border:1px solid rgba(61,220,255,.4);border-radius:50%;background:rgba(0,150,200,.14);color:#aef7ff;font-size:18px}
+@media(max-width:600px){.textCommand{bottom:44px}.bottom{font-size:8px}}
 </style>
 </head>
 <body>
-<div class="online-panel" id="onlinePanel">
-  <div class="online-title">🟢 Онлайн сейчас: <span id="onlineCount">0</span></div>
-  <div id="onlinePlayers" class="online-players"></div>
+<div class="app">
+  <div class="top">
+    <div class="brand">JARVIS</div>
+    <div class="status"><span class="dot"></span><span id="status">ONLINE</span></div>
+  </div>
+
+  <div class="main">
+    <div class="reactor" aria-label="JARVIS core">
+      <div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div><div class="ring r4"></div>
+      <div class="tick"></div><div class="core"></div>
+      <div class="innerText" id="mode">STANDBY</div>
+    </div>
+  </div>
+
+  <div class="panel"><div class="log" id="log"><b>JARVIS:</b> Система готова. Нажмите микрофон и отдайте команду.</div></div>
+
+  <div class="controls">
+    <button class="help" id="help">КОМАНДЫ</button>
+    <button class="mic" id="mic" aria-label="Голосовая команда">◉</button>
+    <button class="help" id="clear">ОЧИСТИТЬ</button>
+  </div>
+  <div class="textCommand">
+    <input id="commandInput" autocomplete="off" placeholder="Или напишите команду..." />
+    <button id="sendCommand">➤</button>
+  </div>
+  <div class="bottom">JARVIS • OFFLINE MODE • NO WEB SEARCH</div>
 </div>
-<div id="announcement" class="announcement"><div class="who" id="announcementWho"></div><div class="text" id="announcementText"></div></div>
-<div id="app" class="wrap"></div>
+
 <script>
-const OWNER_CODE="BOSS2026";
-const STORE="zoo_clicker_v4";
-const ANIMALS=["🐱","🐶","🦊","🐼","🦁","🐰","🐻","🐯","🐨","🐧"];
-const ACH=[
- ["first","🐾 Первый клик",p=>p.total>=1],
- ["100","💯 100 коинов",p=>p.total>=100],
- ["1000","🔥 1 000 коинов",p=>p.total>=1000],
- ["10000","💰 10 000 коинов",p=>p.total>=10000],
- ["lvl10","⭐ Уровень 10",p=>level(p)>=10],
- ["lvl50","🌟 Уровень 50",p=>level(p)>=50],
- ["lvl100","👑 Уровень 100",p=>level(p)>=100],
- ["daily","🎁 Ежедневная награда",p=>p.dailyEver],
- ["rebirth","♻️ Перерождение",p=>p.rebirths>0]
-];
-let db=load(), me=null, view="login";
+const logEl=document.getElementById('log'), statusEl=document.getElementById('status'), modeEl=document.getElementById('mode'), mic=document.getElementById('mic');
+const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+let recognition=null;
+const micModal=document.getElementById('micModal');
+const allowMic=document.getElementById('allowMic');
+const micHint=document.getElementById('micHint');
 
-
-function showAnnouncement(who,text,owner=false){
- const box=document.getElementById("announcement"),w=document.getElementById("announcementWho"),x=document.getElementById("announcementText");
- if(!box||!w||!x)return;
- w.textContent=owner?"🎙️ Владелец":who;
- x.textContent=text;
- box.classList.remove("show");void box.offsetWidth;box.classList.add("show");
- clearTimeout(window.announceTimer);window.announceTimer=setTimeout(()=>box.classList.remove("show"),10000);
-}
-function announcementCost(){return 1000000000}
-function sendAnnouncement(){
- const input=document.getElementById("announcementInput"); if(!input)return;
- const text=input.value.trim();
- if(!text)return toast("Напиши сообщение.");
- const cost=announcementCost();
- if(me.coins<cost)return toast("Не хватает 1 000 000 000 коинов.");
- me.coins-=cost;
- me.lastSeen=Date.now();
- db.announcements=db.announcements||[];
- const ann={name:(me.first+" "+me.last).trim(),text,owner:!!me.owner,at:Date.now()};db.announcements.push(ann);if(window.zooBroadcast)zooBroadcast("announcement",ann);
- if(db.announcements.length>20)db.announcements.shift();
- save();render();showAnnouncement((me.first+" "+me.last).trim(),text,!!me.owner);
- input.value="";
-}
-function ownerAnnouncement(){
- const input=document.getElementById("ownerAnnouncementInput"); if(!input)return;
- const text=input.value.trim(); if(!text)return toast("Напиши объявление.");
- db.announcements=db.announcements||[];
- const ann={name:"Владелец",text,owner:true,at:Date.now()};db.announcements.push(ann);if(window.zooBroadcast)zooBroadcast("announcement",ann);
- if(db.announcements.length>20)db.announcements.shift();
- save();render();showAnnouncement("Владелец",text,true);input.value="";
-}
-function renderAnnouncements(){
- const a=db.announcements&&db.announcements.length?db.announcements[db.announcements.length-1]:null;
- if(a)showAnnouncement(a.name,a.text,!!a.owner);
-}
-
-function load(){try{return JSON.parse(localStorage.getItem(STORE))||{players:{},global:{boost:1,until:0}}}catch(e){return{players:{},global:{boost:1,until:0}}}}
-function save(){localStorage.setItem(STORE,JSON.stringify(db))}
-
-function broadcastGlobalBoost(){
- if(window.zooBroadcast)zooBroadcast("global",db.global);
-}
-function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-function fmt(n){return Math.floor(Number(n)||0).toLocaleString("ru-RU")}
-function name(p){return p.first+" "+p.last}
-function level(p){let l=1;while(l<100&&p.total>=100*Math.pow(10,l-1))l++;return l}
-function levelStart(l){return l<=1?0:100*Math.pow(10,l-2)}
-function levelNext(l){return l>=100?null:100*Math.pow(10,l-1)}
-function lvlBoost(p){return level(p)>=2?1.5:1}
-function totalBoost(p){
- let t=p.boostUntil>Date.now()?p.boost:1;
- let g=db.global.until>Date.now()?db.global.boost:1;
- return lvlBoost(p)*Math.pow(2,p.perm||0)*(p.rebirths?1.5*Math.pow(2,p.rebirths-1):1)*t*g;
-}
-function check(p){p.ach=p.ach||{};for(const [id,,fn] of ACH)if(!p.ach[id]&&fn(p))p.ach[id]=Date.now()}
-function today(){return new Date().toISOString().slice(0,10)}
-function toast(s){const e=document.getElementById("msg");if(e){e.textContent=s;setTimeout(()=>{if(e)e.textContent=""},2200)}}
-function render(){if(view==="login")loginView();else if(view==="animal")animalView();else if(view==="game")gameView();else if(view==="ach")achView();else if(view==="admin")adminView()}
-
-function loginView(){
-app.innerHTML=`<h1>🎪 ЗООКЛИКЕР</h1><div class="card">
-<input id="first" placeholder="Имя" maxlength="20"><input id="last" placeholder="Фамилия" maxlength="20">
-<input id="pass" type="password" placeholder="Пароль"><input id="owner" placeholder="Код владельца (не обязательно)">
-<div id="err" class="msg"></div><button style="width:100%" onclick="login()">ВОЙТИ</button>
-<p class="small center">Эта версия сохраняет данные в памяти браузера.</p></div>`}
-function login(){
- const first=document.getElementById("first").value.trim(),last=document.getElementById("last").value.trim(),pass=document.getElementById("pass").value;
- if(!first||!last||!pass){document.getElementById("err").textContent="Заполни все поля.";return}
- const k=(first+" "+last).toLowerCase();let p=db.players[k];
- if(p&&p.password!==pass){document.getElementById("err").textContent="Неверный пароль.";return}
- if(!p)p={first,last,password:pass,animal:null,coins:0,total:0,perm:0,rebirths:0,boost:1,boostUntil:0,boostBlockedUntil:0,blockedUntil:0,blockedForever:false,owner:false,ach:{},daily:null,dailyEver:false};
- if(document.getElementById("owner").value.trim().toUpperCase()===OWNER_CODE)p.owner=true;
- p.lastSeen=Date.now();db.players[k]=p;save();me=p;view=p.animal==null?"animal":"game";render()
-
- renderAnnouncements();
-}
-function animalView(){
-app.innerHTML=`<h1>🦁 ВЫБЕРИ ЖИВОТНОЕ</h1><div class="card">${ANIMALS.map((x,i)=>`<button style="width:30%;margin:1%" onclick="choose(${i})">${x}</button>`).join("")}</div>`}
-function choose(i){me.animal=i;db.players[(me.first+" "+me.last).toLowerCase()]=me;save();view="game";render()}
-
-function gameView(){
-check(me);save();const l=level(me),next=levelNext(l),start=levelStart(l),pct=next?Math.min(100,Math.max(0,(me.total-start)/(next-start)*100)):100;
-const gb=db.global.until>Date.now();
-app.innerHTML=`<h1>🦁 ЗООКЛИКЕР</h1>
-<div class="card"><div class="coins">🪙 ${fmt(me.coins)}</div>
-<div class="center"><span class="badge">⭐ Уровень ${l}/100</span><span class="badge">⚡ x${totalBoost(me)}</span>${gb?`<span class="badge">🌍 x${db.global.boost}</span>`:""}</div>
-<div class="bar"><i style="width:${pct}%"></i></div><p class="small center">${next?`До уровня ${l+1}: ${fmt(Math.max(0,next-me.total))} накопленных коинов`:"🏆 Максимальный уровень"}</p>
-<button class="animal" onclick="clicker()">${ANIMALS[me.animal]}</button>
-<div id="msg" class="msg"></div></div>
-<div class="row"><button onclick="view='ach';render()">🏆 Достижения</button><button onclick="daily()">🎁 Ежедневная</button></div>
-${me.owner?`<button class="dark" style="width:100%;margin-top:8px" onclick="view='admin';render()">👑 АДМИН-ПАНЕЛЬ</button>`:""}
-<div class="card"><h3>⚡ Бусты</h3>
-<div class="row">
-${(()=>{const mult=me.total>=1000?10:1,c2=200*mult,c5=1000*mult;return `
-<button class="${me.coins>=c2?'affordable-cost':'disabled-cost'}" ${me.coins<c2?'disabled':''} onclick="temp(2,5,${c2})">x2<br><small>${fmt(c2)} · 5 мин</small></button>
-<button class="${me.coins>=c5?'affordable-cost':'disabled-cost'}" ${me.coins<c5?'disabled':''} onclick="temp(5,10,${c5})">x5<br><small>${fmt(c5)} · 10 мин</small></button>`})()}
-</div>
-${(()=>{const c=150*Math.pow(2,me.perm||0)*(me.total>=1000?10:1);return `<button class="${me.coins>=c?'affordable-cost':'disabled-cost'}" ${me.coins<c?'disabled':''} style="width:100%;margin-top:7px" onclick="perm()">Постоянный x${Math.pow(2,(me.perm||0)+1)} · ${fmt(c)} 🪙</button>`})()}
-</div>
-${(()=>{const c=50*Math.pow(8,(me.rebirths||0));return `<div class="card"><h3>♻️ Перерождение</h3><button class="${me.coins>=c?'affordable-cost':'disabled-cost'}" ${me.coins<c?'disabled':''} style="width:100%" onclick="rebirth()">Переродиться · ${fmt(c)} 🪙</button><p class="small center">Сбросит коины и даст постоянный бонус.</p></div>`})()}
-<button class="blue" style="width:100%" onclick="logout()">Выйти</button>`}
-function clicker(){
- if(me.blockedForever||me.blockedUntil>Date.now()){toast("🚫 Ты заблокирован.");return}
- if(me.boostBlockedUntil>Date.now()){toast("🚫 Бусты запрещены.");return}
- const g=Math.max(1,Math.round(totalBoost(me)));
- const paths=[[8,78],[15,70],[22,82],[29,74],[36,86],[43,76],[50,88],[57,72],[64,84],[71,76],[78,87],[85,73],[92,82],[12,90],[25,65],[38,91],[55,68],[68,92],[81,64],[94,70]];
- const pos=paths[Math.floor(Math.random()*paths.length)];
- const f=document.createElement("div");
- f.className="float-coin";f.textContent="+"+fmt(g)+" 🪙";
- f.style.left=pos[0]+"vw";f.style.top=pos[1]+"vh";
- document.body.appendChild(f);setTimeout(()=>f.remove(),2900);
- me.coins+=g;me.total+=g;me.lastSeen=Date.now();check(me);
- db.players[(me.first+" "+me.last).toLowerCase()]=me;save();render()
-}
-function temp(mult,min,cost){
- if(me.boostBlockedUntil>Date.now())return toast("🚫 Бусты запрещены.");
- if(me.boostUntil>Date.now())return toast("У тебя уже есть временный буст.");
- const expected=(mult===2?200:1000)*(me.total>=1000?10:1);
- if(cost!==expected)cost=expected;
- if(me.coins<cost)return toast("Не хватает коинов.");
- me.coins-=cost;me.boost=mult;me.boostUntil=Date.now()+min*60000;save();render()
-}
-function perm(){const c=150*Math.pow(2,me.perm||0)*(me.total>=1000?10:1);if(me.coins<c)return toast("Не хватает коинов.");me.coins-=c;me.perm=(me.perm||0)+1;save();render()}
-function rebirth(){
- const c=50*Math.pow(8,me.rebirths||0);
- if(me.coins<c){toast("Не хватает коинов.");return}
- me.coins=0;
- me.rebirths=(me.rebirths||0)+1;
- check(me);
- save();
- render();
- toast("♻️ Перерождение выполнено!");
-}
-function daily(){if(me.daily===today())return toast("🎁 Сегодня уже получено.");const r=100+level(me)*50;me.coins+=r;me.total+=r;me.daily=today();me.dailyEver=true;check(me);save();render();toast("🎁 +"+fmt(r))}
-function achView(){app.innerHTML=`<h1>🏆 ДОСТИЖЕНИЯ</h1><div class="card">${ACH.map(([id,n])=>`<div class="player"><b>${me.ach?.[id]?"✅":"🔒"} ${n}</b><div class="small">${me.ach?.[id]?"Открыто":"Ещё не открыто"}</div></div>`).join("")}</div><button style="width:100%" onclick="view='game';render()">← Назад</button>`}
-
-function adminView(){
-if(!me.owner){view="game";return render()}
-const arr=Object.values(db.players).filter(p=>p!==me);
-app.innerHTML=`<h1>👑 АДМИН-ПАНЕЛЬ</h1>
-<div class="card"><h3>🌍 Буст всем</h3><div class="row"><input id="gx" type="number" value="100"><input id="gm" type="number" value="10"></div><button style="width:100%" onclick="globalBoost()">⚡ ВКЛЮЧИТЬ ВСЕМ</button><button class="danger" style="width:100%;margin-top:6px" onclick="globalOff()">❌ УБРАТЬ</button></div>
-<div class="card"><h3>👥 Игроки (${arr.length})</h3>${arr.length?arr.map(p=>playerAdmin(p)).join(""):`<p class="small center">Игроков пока нет.</p>`}</div>
-<button class="blue" style="width:100%" onclick="view='game';render()">← К игре</button><div id="msg" class="msg"></div>`}
-function playerAdmin(p){
- const k=(p.first+" "+p.last).toLowerCase(),id="a_"+btoa(unescape(encodeURIComponent(k))).replace(/=/g,"");
- return `<div class="player"><b>${esc(name(p))}</b><br>🪙 ${fmt(p.coins)} · ⭐ ${level(p)} · ⚡ x${totalBoost(p)}
-<div class="row"><input id="${id}" type="number" value="100"><button class="danger" onclick="removeCoins('${esc(k)}','${id}')">🗑️ Удалить</button></div>
-<div class="row"><button onclick="addCoins('${esc(k)}','${id}')">➕ Дать</button><button onclick="zero('${esc(k)}')">0 Обнулить</button></div>
-<div class="row"><input id="${id}x" type="number" value="100"><input id="${id}m" type="number" value="10"></div>
-<button style="width:100%" onclick="giveBoost('${esc(k)}','${id}')">⚡ Выдать буст</button>
-<button class="danger" style="width:100%;margin-top:5px" onclick="blockBoost('${esc(k)}','${id}m')">🚫 Запретить буст на время</button>
-<button class="green" style="width:100%;margin-top:5px" onclick="unblockBoost('${esc(k)}')">✅ Разрешить буст</button>
-<div class="row" style="margin-top:5px"><button onclick="blockPlayer('${esc(k)}','${id}m')">🚫 Блок</button><button onclick="unblockPlayer('${esc(k)}')">Разблокировать</button></div></div>`}
-function pget(k){return db.players[k]}
-function removeCoins(k,id){let p=pget(k),n=Math.max(0,Math.floor(Number(document.getElementById(id).value)||0));if(!p||!n)return;p.coins=Math.max(0,p.coins-n);save();render()}
-function addCoins(k,id){let p=pget(k),n=Math.max(0,Math.floor(Number(document.getElementById(id).value)||0));if(!p||!n)return;p.coins+=n;p.total+=n;check(p);save();render()}
-function zero(k){if(db.players[k]){db.players[k].coins=0;save();render()}}
-function giveBoost(k,id){let p=pget(k),x=Math.max(1,Number(document.getElementById(id+"x").value)||1),m=Math.max(1,Number(document.getElementById(id+"m").value)||10);if(!p)return;p.boost=x;p.boostUntil=Date.now()+m*60000;save();render()}
-function blockBoost(k,id){let p=pget(k),m=Math.max(1,Number(document.getElementById(id).value)||10);if(!p)return;p.boost=1;p.boostUntil=0;p.boostBlockedUntil=Date.now()+m*60000;save();render()}
-function unblockBoost(k){if(db.players[k]){db.players[k].boostBlockedUntil=0;save();render()}}
-function blockPlayer(k,id){let p=pget(k),m=Math.max(1,Number(document.getElementById(id).value)||10);if(!p)return;p.blockedUntil=Date.now()+m*60000;save();render()}
-function unblockPlayer(k){if(db.players[k]){db.players[k].blockedUntil=0;p=0;save();render()}}
-function globalBoost(){let x=Math.max(1,Number(document.getElementById("gx").value)||100),m=Math.max(1,Number(document.getElementById("gm").value)||10);db.global={boost:x,until:Date.now()+m*60000};save();render()}
-function globalOff(){db.global={boost:1,until:0};save();render()}
-function logout(){me=null;view="login";render()}
-render();
-</script>
-
-<div class="card"><h3>📣 Сообщение всем</h3>
-<p class="small">Одно сообщение стоит <b>1 000 000 000 🪙</b>.</p>
-<div class="announce-form"><input id="announcementInput" maxlength="180" placeholder="Напиши сообщение..."><button onclick="sendAnnouncement()">Отправить всем</button></div>
-</div>
-<div class="card"><h3>🎙️ Объявление владельца</h3>
-<p class="small">Только владелец. Показывается всем игрокам.</p>
-<div class="announce-form"><input id="ownerAnnouncementInput" maxlength="180" placeholder="Например: Привет, сейчас будет ивент!"><button onclick="ownerAnnouncement()">Объявить всем</button></div>
-</div>
-<script type="module">
-import { connect } from "https://esm.sh/itty-sockets@1.0.0";
-
-const ZOO_CHANNEL="zoo-clicker-public-v1";
-let zooSocket=null;
-const zooOnline=new Map();
-const zooUID=crypto.randomUUID ? crypto.randomUUID() : ("z_"+Date.now()+"_"+Math.random().toString(36).slice(2));
-
-function zooPlayerName(){
-  return (window.me && ((window.me.first||"")+" "+(window.me.last||"")).trim()) || "Игрок";
-}
-function zooRenderOnline(){
-  const names=[...zooOnline.values()].filter(p=>Date.now()-p.at<10000);
-  const c=document.getElementById("onlineCount"), box=document.getElementById("onlinePlayers");
-  if(c)c.textContent=String(names.length);
-  if(box){
-    box.innerHTML="";
-    names.forEach(p=>{
-      const e=document.createElement("div");e.className="online-player";
-      e.textContent="🟢 "+p.name;
-      box.appendChild(e);
-    });
+async function requestMicrophone(){
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    micHint.textContent='Браузер не поддерживает запрос микрофона.';
+    return false;
+  }
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    stream.getTracks().forEach(t=>t.stop());
+    micHint.textContent='Микрофон разрешён.';
+    setTimeout(()=>micModal.style.display='none',350);
+    return true;
+  }catch(err){
+    micHint.textContent='Доступ не разрешён. Разрешите микрофон в настройках сайта.';
+    return false;
   }
 }
-function zooBroadcast(type,data){
-  if(zooSocket)zooSocket.send({type,data});
+
+function log(who,text){
+  logEl.innerHTML += `<br><b>${who}:</b> ${escapeHtml(text)}`;
+  logEl.scrollTop=logEl.scrollHeight;
 }
-function zooRealtimeStart(){
+function escapeHtml(s){return s.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function speak(text){
+  if('speechSynthesis' in window){
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(text);
+    u.lang='ru-RU';u.rate=.95;u.pitch=.9;
+    speechSynthesis.speak(u);
+  }
+}
+function answer(text){log('JARVIS',text);speak(text)}
+
+function openSite(url,name){
+  answer('Команда «'+name+'» сейчас работает в локальном режиме. Я не буду открывать браузер.');
+}
+function calculate(expr){
+  const cleaned=expr.toLowerCase()
+    .replace(/посчитать|посчитай|сколько будет|вычисли|равно/g,'')
+    .replace(/умножить на|умножить/g,'*')
+    .replace(/разделить на|разделить/g,'/')
+    .replace(/плюс/g,'+').replace(/минус/g,'-')
+    .replace(/(\d)\s*x\s*(\d)/g,'$1*$2').replace(/[^0-9+\-*/().\s]/g,'').trim();
+  if(!cleaned)return null;
   try{
-    zooSocket=connect(ZOO_CHANNEL,{as:zooPlayerName(),announce:true});
-    zooSocket.on("message",({message,uid,alias})=>{
-      if(!message)return;
-      if(message.type==="presence"){
-        if(uid===zooUID)return;
-        zooOnline.set(uid,{name:message.data?.name||alias||"Игрок",at:Date.now()});
-        zooRenderOnline();
-        return;
-      }
-      if(message.type==="leave"){
-        if(uid!==zooUID){zooOnline.delete(uid);zooRenderOnline();}
-        return;
-      }
-      if(message.type==="global"){
-        const g=message.data;
-        if(g){db.global=g;render();}
-        return;
-      }
-      if(message.type==="announcement"){
-        const a=message.data;
-        if(a){
-          db.announcements=db.announcements||[];
-          const last=db.announcements[db.announcements.length-1];
-          if(!last||last.at!==a.at){
-            db.announcements.push(a);
-            if(db.announcements.length>20)db.announcements.shift();
-            localStorage.setItem(STORE,JSON.stringify(db));
-            showAnnouncement(a.name,a.text,!!a.owner);
-          }
-        }
-        return;
-      }
-    });
-    // Announce ourselves and refresh presence.
-    const hello=()=>zooBroadcast("presence",{name:zooPlayerName()});
-    hello(); setInterval(hello,3000); setInterval(zooRenderOnline,2000);
-  }catch(e){console.warn("Realtime unavailable",e);}
+    if(!/^[0-9+\-*/().\s]+$/.test(cleaned))return null;
+    const result=Function('"use strict";return ('+cleaned+')')();
+    return Number.isFinite(result)?String(result):null;
+  }catch(e){return null}
 }
-window.zooBroadcast=zooBroadcast;
-window.zooRealtimeStart=zooRealtimeStart;
-window.addEventListener("load",()=>setTimeout(zooRealtimeStart,500));
+
+function execute(raw){
+  const original=raw.trim();
+  const cmd=original.toLowerCase();
+  modeEl.textContent='PROCESSING';
+
+  if(!original){
+    answer('Я не услышал команду.');
+  }else if(cmd.includes('привет')||cmd.includes('здравствуй')||cmd.includes('добрый')){
+    answer('Здравствуйте. Я JARVIS. Система полностью готова к работе.');
+  }else if(cmd.includes('который час')||cmd==='время'||cmd.includes('сколько времени')){
+    const now=new Date();
+    answer('Сейчас '+now.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'}));
+  }else if(cmd.includes('какая сегодня дата')||cmd.includes('какое сегодня число')||cmd==='дата'){
+    answer('Сегодня '+new Date().toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'})+'.');
+  }else if(cmd.includes('как тебя зовут')||cmd.includes('кто ты')){
+    answer('Я JARVIS, ваш локальный голосовой помощник. Я работаю прямо внутри этой страницы.');
+  }else if(cmd.includes('что ты умеешь')||cmd.includes('команды')){
+    answer('Я умею отвечать на простые вопросы, сообщать время и дату, считать, запоминать текст, показывать системные сведения и управлять интерфейсом. Интернет для ответов не используется.');
+  }else if(cmd.includes('открой youtube')||cmd.includes('ютуб')||
+          cmd.includes('открой google')||cmd.includes('гугл')||
+          cmd.includes('открой github')||cmd.includes('гитхаб')||
+          cmd.includes('открой telegram')||cmd.includes('телеграм')){
+    answer('Я работаю в автономном режиме, поэтому никуда вас не перенаправляю.');
+  }else if(cmd.includes('поиск')||cmd.includes('найди')){
+    answer('Поиск в интернете отключён. Я не буду открывать браузер или отправлять вас на другие сайты.');
+  }else if(cmd.includes('полный экран')||cmd.includes('полноэкран')){
+    if(document.documentElement.requestFullscreen){
+      document.documentElement.requestFullscreen().then(()=>answer('Полноэкранный режим включён.')).catch(()=>answer('Браузер не разрешил полноэкранный режим.'));
+    }else answer('Полноэкранный режим недоступен в этом предпросмотре.');
+  }else if(cmd.includes('выйди из полного экрана')){
+    document.exitFullscreen?.();answer('Выход из полноэкранного режима.');
+  }else if(cmd.includes('очисти')||cmd.includes('очистить')){
+    logEl.innerHTML='<b>JARVIS:</b> Журнал очищен.';
+    speak('Журнал очищен.');
+  }else if(cmd.includes('запомни')){
+    const memory=original.replace(/.*?запомни\s*/i,'').trim();
+    if(memory){
+      localStorage.setItem('jarvisMemory',memory);
+      answer('Запомнил. Эта информация сохранена локально на этом устройстве.');
+    }else answer('Скажите, что именно нужно запомнить.');
+  }else if(cmd.includes('что ты запомнил')||cmd.includes('моя память')){
+    const m=localStorage.getItem('jarvisMemory');
+    answer(m?'Я помню: '+m:'Моя локальная память пока пуста.');
+  }else if(cmd.includes('забудь')){
+    localStorage.removeItem('jarvisMemory');
+    answer('Локальная память очищена.');
+  }else if(cmd.includes('кто создал тебя')||cmd.includes('кто тебя создал')){
+    answer('Я создан как демонстрационный локальный JARVIS для этой страницы.');
+  }else if(cmd.includes('спасибо')){
+    answer('Пожалуйста. Всегда готов.');
+  }else{
+    const result=calculate(cmd);
+    if(result!==null) answer('Результат: '+result);
+    else answer('Я пока не знаю, как ответить на эту команду. Но я не буду открывать браузер или искать в интернете.');
+  }
+  setTimeout(()=>modeEl.textContent='STANDBY',700);
+}
+if(SpeechRecognition){
+  recognition=new SpeechRecognition();
+  recognition.lang='ru-RU';recognition.interimResults=false;recognition.continuous=false;
+  recognition.onstart=()=>{mic.classList.add('listening');statusEl.textContent='LISTENING';modeEl.textContent='LISTENING';log('SYSTEM','Слушаю...')};
+  recognition.onresult=e=>{const text=e.results[0][0].transcript;log('YOU',text);execute(text)};
+  recognition.onerror=e=>{log('SYSTEM','Не удалось распознать команду.');statusEl.textContent='ONLINE';modeEl.textContent='STANDBY'};
+  recognition.onend=()=>{mic.classList.remove('listening');statusEl.textContent='ONLINE';if(modeEl.textContent==='LISTENING')modeEl.textContent='STANDBY'};
+}else{
+  statusEl.textContent='NO VOICE API';
+}
+mic.onclick=()=>{
+  if(!recognition){answer('Этот браузер не поддерживает голосовое распознавание. Попробуйте Chrome.');return}
+  try{recognition.start()}catch(e){}
+};
+document.getElementById('clear').onclick=()=>{logEl.innerHTML='<b>JARVIS:</b> Журнал очищен.'};
+document.getElementById('help').onclick=()=>{
+  const text='Доступные команды: открой YouTube, открой Google, открой GitHub, открой Telegram, найди что-нибудь, который час, посчитай выражение, полный экран, запомни текст, что ты запомнил.';
+  log('JARVIS',text);speak(text);
+};
 </script>
-</body></html>
+
+<div id="micModal" class="modal">
+  <div class="modalBox">
+    <div class="modalIcon">🎙️</div>
+    <div class="modalTitle">Доступ к микрофону</div>
+    <div class="modalText">JARVIS использует микрофон, чтобы слышать ваши голосовые команды.</div>
+    <button id="allowMic" class="allowBtn">РАЗРЕШИТЬ МИКРОФОН</button>
+    <div id="micHint" class="micHint">Нажмите кнопку, чтобы продолжить.</div>
+  </div>
+</div>
+</body>
+</html>
