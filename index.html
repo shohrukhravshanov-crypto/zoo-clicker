@@ -47,7 +47,7 @@ background-size:auto,auto,42px 42px,42px 42px;pointer-events:none}
 .modalText{margin:14px 0 22px;color:#8fc4ce;font-size:14px;line-height:1.55}
 .allowBtn{width:100%;height:50px;border:1px solid #46eaff;border-radius:25px;background:rgba(0,190,235,.16);color:#dfffff;font-weight:700;letter-spacing:1px;cursor:pointer;box-shadow:0 0 18px rgba(0,220,255,.18)}
 .allowBtn:active{transform:scale(.98)}
-.skipBtn{width:100%;height:44px;margin-top:10px;border:1px solid rgba(120,190,205,.25);border-radius:22px;background:rgba(20,45,55,.35);color:#9ec4cb;font-weight:600;letter-spacing:.7px;cursor:pointer}
+.skipBtn{width:100%;height:52px;margin-top:10px;border:1px solid rgba(120,190,205,.25);border-radius:22px;background:rgba(20,45,55,.35);color:#9ec4cb;font-weight:600;letter-spacing:.7px;cursor:pointer}
 .skipBtn:active{transform:scale(.98);background:rgba(40,80,90,.45)}
 .micHint{min-height:18px;margin-top:12px;font-size:11px;color:#6e9da7}
 
@@ -62,12 +62,12 @@ background-size:auto,auto,42px 42px,42px 42px;pointer-events:none}
 <div class="app">
   <div id="micModal" class="modal">
   <div class="modalBox">
-    <div class="modalIcon">🎙️</div>
-    <div class="modalTitle">Доступ к микрофону</div>
-    <div class="modalText">JARVIS использует микрофон, чтобы слышать ваши голосовые команды.</div>
+    <div class="modalIcon">⚡</div>
+    <div class="modalTitle">ЗАПУСК JARVIS</div>
+    <div class="modalText">Выберите способ управления JARVIS.</div>
     <button id="allowMic" class="allowBtn">РАЗРЕШИТЬ МИКРОФОН</button>
-    <button id="skipMic" class="skipBtn">ПРОДОЛЖИТЬ БЕЗ МИКРОФОНА</button>
-    <div id="micHint" class="micHint">Можно продолжить без микрофона и писать команды вручную.</div>
+    <button id="skipMic" class="skipBtn">▶ ПРОДОЛЖИТЬ БЕЗ МИКРОФОНА</button>
+    <div id="micHint" class="micHint">Микрофон не обязателен. Можно сразу продолжить без него.</div>
   </div>
 </div>
   <div class="top">
@@ -115,7 +115,7 @@ async function requestMicrophone(){
     const stream=await navigator.mediaDevices.getUserMedia({audio:true});
     stream.getTracks().forEach(t=>t.stop());
     micHint.textContent='Микрофон разрешён.';
-    setTimeout(()=>micModal.style.display='none',350);
+    setTimeout(()=>{micModal.style.display='none';document.body.classList.remove('startup');},350);
     return true;
   }catch(err){
     micHint.textContent='Доступ не разрешён. Разрешите микрофон в настройках сайта.';
@@ -265,11 +265,13 @@ allowMic.onclick=async()=>{
 
 skipMic.onclick=()=>{
   micModal.style.display='none';
+  document.body.classList.remove('startup');
   statusEl.textContent='TEXT MODE';
   modeEl.textContent='TEXT READY';
   log('JARVIS','Микрофон пропущен. Пишите команды в поле снизу.');
 };
 micModal.style.display='flex';
+document.body.classList.add('startup');
 
 document.getElementById('help').onclick=()=>{
   const text='Доступные команды: открой YouTube, открой Google, открой GitHub, открой Telegram, найди что-нибудь, который час, посчитай выражение, полный экран, запомни текст, что ты запомнил.';
